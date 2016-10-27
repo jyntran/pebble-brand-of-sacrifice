@@ -3,6 +3,8 @@
 
 static Window *s_window;
 static TextLayer *s_text_layer_h, *s_text_layer_m;
+static BitmapLayer *s_background_layer;
+static GBitmap *s_bitmap_brand;
 
 static void update_time() {
   time_t temp = time(NULL);
@@ -21,9 +23,21 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
 }
 
+static void canvas_update_proc(Layer *layer, GContext *ctx) {
+  // Canvas drawing goes here
+}
+
 static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
+
+  s_bitmap_brand = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BRAND_70);
+
+  s_background_layer = bitmap_layer_create(
+      GRect(0, 0, bounds.size.w, bounds.size.h));
+  bitmap_layer_set_compositing_mode(s_background_layer, GCompOpSet);
+  bitmap_layer_set_bitmap(s_background_layer, s_bitmap_brand);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_background_layer));
 
   s_text_layer_h = text_layer_create(GRect(0, 72, bounds.size.w, 28));
   text_layer_set_background_color(s_text_layer_h, GColorClear);
@@ -38,6 +52,16 @@ static void prv_window_load(Window *window) {
   text_layer_set_font(s_text_layer_m, fonts_get_system_font(FONT_KEY_LECO_28_LIGHT_NUMBERS));
   text_layer_set_text_alignment(s_text_layer_m, GTextAlignmentRight);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_m));
+
+/*
+  // Canvas layer
+  static Layer *s_canvas_layer;
+  s_canvas_layer = layer_create(bounds);
+  layer_set_update_proc(s_canvas_layer, canvas_update_proc);
+  layer_add_child(window_layer, s_canvas_layer);
+
+  layer_mark_dirty(s_canvas_layer);
+*/
 }
 
 static void prv_window_unload(Window *window) {

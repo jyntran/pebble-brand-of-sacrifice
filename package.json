@@ -23,7 +23,20 @@
       "dummy"
     ],
     "resources": {
-      "media": []
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "IMAGE_BRAND_70",
+          "file": "images/brand-red-70.png",
+          "storageFormat": "png"
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_BLUETOOTH_120",
+          "file": "images/bluetooth-120.png",
+          "storageFormat": "png"
+        }
+      ]
     }
   }
 }
