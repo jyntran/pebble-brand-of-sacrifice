@@ -1,0 +1,29 @@
+{
+  "name": "Brand of Sacrifice",
+  "author": "jyntran",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "brand-of-sacrifice",
+    "uuid": "9e7661b3-d9b1-48ac-9f09-cb0e6cf52119",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "dummy"
+    ],
+    "resources": {
+      "media": []
+    }
+  }
+}
