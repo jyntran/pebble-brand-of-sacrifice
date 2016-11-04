@@ -2,6 +2,8 @@
 #include <string.h>
 
 #define BRAND_STROKE_WIDTH 3
+#define TIME_FONT RESOURCE_ID_FONT_SMALLTYPE_40
+#define TIME_HEIGHT 42
 
 static Window *s_window;
 static TextLayer *s_text_layer_h, *s_text_layer_m;
@@ -71,13 +73,13 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
   GPathInfo BT_TOP_INFO = {
     .num_points = 7,
     .points = (GPoint[7]) {
-      {-4, -32},
+      {-3, -32},
       {-8, -40},
-      {-3, -36},
+      {-2, -36},
       {0, -46},
-      {3, -36},
+      {2, -36},
       {8, -40},
-      {4, -32}
+      {3, -32}
     }
   };
 
@@ -137,13 +139,13 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   GPathInfo BRAND_TOP_INFO = {
     .num_points = 7,
     .points = (GPoint[7]) {
-      {-4, -32},
+      {-3, -32},
       {-8, -40},
-      {-3, -36},
+      {-2, -36},
       {0, -46},
-      {3, -36},
+      {2, -36},
       {8, -40},
-      {4, -32}
+      {3, -32}
     }
   };
 
@@ -176,16 +178,16 @@ static void prv_window_load(Window *window) {
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   window_set_background_color(window, GColorBlack);
 
-  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_OFFENBACHER_40));
+  s_time_font = fonts_load_custom_font(resource_get_handle(TIME_FONT));
 
-  s_text_layer_h = text_layer_create(grect_inset(GRect(0, centre.y-30, bounds.size.w/2, 40), (GEdgeInsets){ .right=centre.x/2.5}));
+  s_text_layer_h = text_layer_create(grect_inset(GRect(0, centre.y-30, bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .right=centre.x/3}));
   text_layer_set_background_color(s_text_layer_h, GColorClear);
   text_layer_set_text_color(s_text_layer_h, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
   text_layer_set_font(s_text_layer_h, s_time_font);
   text_layer_set_text_alignment(s_text_layer_h, GTextAlignmentRight);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_h));
 
-  s_text_layer_m = text_layer_create(grect_inset(GRect(centre.x, centre.y-30, bounds.size.w/2, 40), (GEdgeInsets){ .left=centre.x/2.5}));
+  s_text_layer_m = text_layer_create(grect_inset(GRect(centre.x, centre.y-30, bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .left=centre.x/3}));
   text_layer_set_background_color(s_text_layer_m, GColorClear);
   text_layer_set_text_color(s_text_layer_m, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
   text_layer_set_font(s_text_layer_m, s_time_font);

@@ -28,6 +28,12 @@
         {
           "characterRegex": "[0-9]",
           "type": "font",
+          "name": "FONT_SMALLTYPE_40",
+          "file": "fonts/SmallTypeWritingMedium.ttf"
+        },
+        {
+          "characterRegex": "[0-9]",
+          "type": "font",
           "name": "FONT_OFFENBACHER_40",
           "file": "fonts/OfenbacherSchwabCAT.ttf"
         }
