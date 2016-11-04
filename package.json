@@ -14,7 +14,8 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite"
+      "diorite",
+      "emery"
     ],
     "watchapp": {
       "watchface": true
@@ -25,26 +26,10 @@
     "resources": {
       "media": [
         {
-          "type": "raw",
-          "name": "IMAGE_BRAND",
-          "file": "images/brand.pdc"
-        },
-        {
-          "type": "raw",
-          "name": "IMAGE_BLUETOOTH",
-          "file": "images/bluetooth.pdc"
-        },
-        {
-          "type": "bitmap",
-          "name": "IMAGE_BRAND_70",
-          "file": "images/brand-red-70.png",
-          "storageFormat": "png"
-        },
-        {
-          "type": "bitmap",
-          "name": "IMAGE_BLUETOOTH_120",
-          "file": "images/bluetooth-120.png",
-          "storageFormat": "png"
+          "characterRegex": "[0-9]",
+          "type": "font",
+          "name": "FONT_OFFENBACHER_40",
+          "file": "fonts/OfenbacherSchwabCAT.ttf"
         }
       ]
     }

@@ -1,9 +1,11 @@
 #include <pebble.h>
 #include <string.h>
 
+#define BRAND_STROKE_WIDTH 3
+
 static Window *s_window;
 static TextLayer *s_text_layer_h, *s_text_layer_m;
-
+static GFont s_time_font;
 static Layer *s_canvas_layer, *s_bt_layer;
 
 
@@ -44,17 +46,17 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
     .num_points = 9,
     .points = (GPoint[9]) {
       // Left
-      {-20, -24},
+      {-25, -24},
       {0, 0},
-      {-20, 20},
+      {-25, 20},
       {0, 0},
       // Middle
       {0, 40},
       // Right
-      {20, 20},
+      {25, 20},
       {0, 0},
-      {20, -24},
-      {15, -40}
+      {25, -24},
+      {16, -32}
     }
   };
 
@@ -62,20 +64,20 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
     .num_points = 2,
     .points = (GPoint[2]) {
       {0, 40},
-      {0, -40}
+      {0, -36}
     }
   };
 
   GPathInfo BT_TOP_INFO = {
     .num_points = 7,
     .points = (GPoint[7]) {
-      {-4, -36},
-      {-8, -44},
-      {-3, -40},
-      {0, -54},
-      {3, -40},
-      {8, -44},
-      {4, -36}
+      {-4, -32},
+      {-8, -40},
+      {-3, -36},
+      {0, -46},
+      {3, -36},
+      {8, -40},
+      {4, -32}
     }
   };
 
@@ -87,9 +89,9 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
   gpath_move_to(s_bt_centre, centre);
   gpath_move_to(s_bt_top, centre);
 
-  graphics_context_set_stroke_color(ctx, GColorRed);
-  graphics_context_set_fill_color(ctx, GColorRed);
-  graphics_context_set_stroke_width(ctx, 4);
+  graphics_context_set_stroke_color(ctx, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
+  graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
+  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
 
   gpath_draw_outline_open(ctx, s_bt_path);
   gpath_draw_outline_open(ctx, s_bt_centre);
@@ -110,17 +112,17 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
     .num_points = 9,
     .points = (GPoint[9]) {
       // Left
-      {-15, -40},
-      {-20, -24},
+      {-16, -32},
+      {-25, -24},
       {0, 0},
-      {-20, 20},
+      {-25, 20},
       // Middle
       {0, 40},
       // Right
-      {20, 20},
+      {25, 20},
       {0, 0},
-      {20, -24},
-      {15, -40}
+      {25, -24},
+      {16, -32}
     }
   };
 
@@ -128,20 +130,20 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
     .num_points = 2,
     .points = (GPoint[2]) {
       {0, 40},
-      {0, -40}
+      {0, -36}
     }
   };
 
   GPathInfo BRAND_TOP_INFO = {
     .num_points = 7,
     .points = (GPoint[7]) {
-      {-4, -36},
-      {-8, -44},
-      {-3, -40},
-      {0, -54},
-      {3, -40},
-      {8, -44},
-      {4, -36}
+      {-4, -32},
+      {-8, -40},
+      {-3, -36},
+      {0, -46},
+      {3, -36},
+      {8, -40},
+      {4, -32}
     }
   };
 
@@ -153,12 +155,12 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   gpath_move_to(s_brand_centre, centre);
   gpath_move_to(s_brand_top, centre);
 
-  graphics_context_set_stroke_color(ctx, GColorRed);
-  graphics_context_set_fill_color(ctx, GColorRed);
-  graphics_context_set_stroke_width(ctx, 4);
+  graphics_context_set_stroke_color(ctx, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
+  graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
+  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
 
   gpath_draw_outline_open(ctx, s_brand_path);
-  gpath_draw_outline_open(ctx, s_brand_centre);
+  gpath_draw_outline(ctx, s_brand_centre);
   gpath_draw_filled(ctx, s_brand_top);
 
   gpath_destroy(s_brand_path);
@@ -171,26 +173,30 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
+  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   window_set_background_color(window, GColorBlack);
 
-  s_text_layer_h = text_layer_create(grect_inset(GRect(0, bounds.size.h/2 - 20, bounds.size.w, 28), (GEdgeInsets){ .left=8, .right=8}));
+  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_OFFENBACHER_40));
+
+  s_text_layer_h = text_layer_create(grect_inset(GRect(0, centre.y-30, bounds.size.w/2, 40), (GEdgeInsets){ .right=centre.x/2.5}));
   text_layer_set_background_color(s_text_layer_h, GColorClear);
-  text_layer_set_text_color(s_text_layer_h, GColorRed);
-  text_layer_set_font(s_text_layer_h, fonts_get_system_font(FONT_KEY_LECO_28_LIGHT_NUMBERS));
-  text_layer_set_text_alignment(s_text_layer_h, GTextAlignmentLeft);
+  text_layer_set_text_color(s_text_layer_h, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
+  text_layer_set_font(s_text_layer_h, s_time_font);
+  text_layer_set_text_alignment(s_text_layer_h, GTextAlignmentRight);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_h));
 
-  s_text_layer_m = text_layer_create(grect_inset(GRect(0, bounds.size.h/2 - 20, bounds.size.w, 28), (GEdgeInsets){ .left=8, .right=8}));
+  s_text_layer_m = text_layer_create(grect_inset(GRect(centre.x, centre.y-30, bounds.size.w/2, 40), (GEdgeInsets){ .left=centre.x/2.5}));
   text_layer_set_background_color(s_text_layer_m, GColorClear);
-  text_layer_set_text_color(s_text_layer_m, GColorRed);
-  text_layer_set_font(s_text_layer_m, fonts_get_system_font(FONT_KEY_LECO_28_LIGHT_NUMBERS));
-  text_layer_set_text_alignment(s_text_layer_m, GTextAlignmentRight);
+  text_layer_set_text_color(s_text_layer_m, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
+  text_layer_set_font(s_text_layer_m, s_time_font);
+  text_layer_set_text_alignment(s_text_layer_m, GTextAlignmentLeft);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_m));
 
   // Bluetooth
   s_bt_layer = layer_create(bounds);
   layer_set_update_proc(s_bt_layer, bt_update_proc);
   layer_add_child(window_layer, s_bt_layer);
+  layer_set_hidden(s_bt_layer, true);
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());
 
@@ -205,6 +211,7 @@ static void prv_window_unload(Window *window) {
   text_layer_destroy(s_text_layer_m);
   layer_destroy(s_canvas_layer);
   layer_destroy(s_bt_layer);
+  fonts_unload_custom_font(s_time_font);
 }
 
 static void prv_init(void) {
