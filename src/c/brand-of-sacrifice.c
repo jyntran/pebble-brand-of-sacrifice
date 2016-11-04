@@ -3,11 +3,9 @@
 
 static Window *s_window;
 static TextLayer *s_text_layer_h, *s_text_layer_m;
-static BitmapLayer *s_bt_layer;
-static GBitmap *s_bitmap_bt;
 
-static Layer *s_canvas_layer;
-static GDrawCommandImage *s_command_image, *s_bt_image;
+static Layer *s_canvas_layer, *s_bt_layer;
+
 
 static void update_time() {
   time_t temp = time(NULL);
@@ -27,31 +25,147 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void bluetooth_callback(bool connected) {
-  layer_set_hidden(bitmap_layer_get_layer(s_bt_layer), connected);
+  if (s_bt_layer && s_canvas_layer) {
+    layer_set_hidden(s_bt_layer, connected);
+    layer_set_hidden(s_canvas_layer, !connected);
+  }
 
   if (!connected) {
     vibes_double_pulse();
   }
 }
 
-static void canvas_update_proc(Layer *layer, GContext *ctx) {
-  GSize img_size = gdraw_command_image_get_bounds_size(s_command_image);
+
+static void bt_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
-  const GEdgeInsets frame_insets = {
-    .top = (bounds.size.h - img_size.h) / 2,
-    .left = (bounds.size.w - img_size.w) / 2
+  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+
+  GPathInfo BT_PATH_INFO = {
+    .num_points = 9,
+    .points = (GPoint[9]) {
+      // Left
+      {-20, -24},
+      {0, 0},
+      {-20, 20},
+      {0, 0},
+      // Middle
+      {0, 40},
+      // Right
+      {20, 20},
+      {0, 0},
+      {20, -24},
+      {15, -40}
+    }
   };
 
-  // Set the origin offset from the context for drawing the image
-  //GPoint origin = GPoint(0, 0);
+  GPathInfo BT_CENTRE_INFO = {
+    .num_points = 2,
+    .points = (GPoint[2]) {
+      {0, 40},
+      {0, -40}
+    }
+  };
 
-  // If the image was loaded successfully...
-  if (s_command_image) {
-    // Draw it
-    //gdraw_command_image_draw(ctx, s_command_image, origin);
-    gdraw_command_image_draw(ctx, s_command_image, grect_inset(bounds, frame_insets).origin);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawn image");
-  }
+  GPathInfo BT_TOP_INFO = {
+    .num_points = 7,
+    .points = (GPoint[7]) {
+      {-4, -36},
+      {-8, -44},
+      {-3, -40},
+      {0, -54},
+      {3, -40},
+      {8, -44},
+      {4, -36}
+    }
+  };
+
+  GPath *s_bt_path = gpath_create(&BT_PATH_INFO);
+  GPath *s_bt_centre = gpath_create(&BT_CENTRE_INFO);
+  GPath *s_bt_top = gpath_create(&BT_TOP_INFO);
+
+  gpath_move_to(s_bt_path, centre);
+  gpath_move_to(s_bt_centre, centre);
+  gpath_move_to(s_bt_top, centre);
+
+  graphics_context_set_stroke_color(ctx, GColorRed);
+  graphics_context_set_fill_color(ctx, GColorRed);
+  graphics_context_set_stroke_width(ctx, 4);
+
+  gpath_draw_outline_open(ctx, s_bt_path);
+  gpath_draw_outline_open(ctx, s_bt_centre);
+  gpath_draw_filled(ctx, s_bt_top);
+
+  gpath_destroy(s_bt_path);
+  gpath_destroy(s_bt_centre);
+  gpath_destroy(s_bt_top);
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawn BT");
+}
+
+static void canvas_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+
+  GPathInfo BRAND_PATH_INFO = {
+    .num_points = 9,
+    .points = (GPoint[9]) {
+      // Left
+      {-15, -40},
+      {-20, -24},
+      {0, 0},
+      {-20, 20},
+      // Middle
+      {0, 40},
+      // Right
+      {20, 20},
+      {0, 0},
+      {20, -24},
+      {15, -40}
+    }
+  };
+
+  GPathInfo BRAND_CENTRE_INFO = {
+    .num_points = 2,
+    .points = (GPoint[2]) {
+      {0, 40},
+      {0, -40}
+    }
+  };
+
+  GPathInfo BRAND_TOP_INFO = {
+    .num_points = 7,
+    .points = (GPoint[7]) {
+      {-4, -36},
+      {-8, -44},
+      {-3, -40},
+      {0, -54},
+      {3, -40},
+      {8, -44},
+      {4, -36}
+    }
+  };
+
+  GPath *s_brand_path = gpath_create(&BRAND_PATH_INFO);
+  GPath *s_brand_centre = gpath_create(&BRAND_CENTRE_INFO);
+  GPath *s_brand_top = gpath_create(&BRAND_TOP_INFO);
+
+  gpath_move_to(s_brand_path, centre);
+  gpath_move_to(s_brand_centre, centre);
+  gpath_move_to(s_brand_top, centre);
+
+  graphics_context_set_stroke_color(ctx, GColorRed);
+  graphics_context_set_fill_color(ctx, GColorRed);
+  graphics_context_set_stroke_width(ctx, 4);
+
+  gpath_draw_outline_open(ctx, s_brand_path);
+  gpath_draw_outline_open(ctx, s_brand_centre);
+  gpath_draw_filled(ctx, s_brand_top);
+
+  gpath_destroy(s_brand_path);
+  gpath_destroy(s_brand_centre);
+  gpath_destroy(s_brand_top);
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawn brand");
 }
 
 static void prv_window_load(Window *window) {
@@ -59,16 +173,6 @@ static void prv_window_load(Window *window) {
   GRect bounds = layer_get_bounds(window_layer);
   window_set_background_color(window, GColorBlack);
 
-/*
-  s_bitmap_brand = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BRAND_70);
-  s_background_layer = bitmap_layer_create(
-      GRect(0, 0, bounds.size.w, bounds.size.h));
-  bitmap_layer_set_compositing_mode(s_background_layer, GCompOpSet);
-  bitmap_layer_set_bitmap(s_background_layer, s_bitmap_brand);
-  layer_add_child(window_layer, bitmap_layer_get_layer(s_background_layer));
-*/
-
-  //s_text_layer_h = text_layer_create(GRect(0, bounds.size.h/2 - 20, bounds.size.w, 28));
   s_text_layer_h = text_layer_create(grect_inset(GRect(0, bounds.size.h/2 - 20, bounds.size.w, 28), (GEdgeInsets){ .left=8, .right=8}));
   text_layer_set_background_color(s_text_layer_h, GColorClear);
   text_layer_set_text_color(s_text_layer_h, GColorRed);
@@ -84,14 +188,9 @@ static void prv_window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_m));
 
   // Bluetooth
-  s_bitmap_bt = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLUETOOTH_120);
-  s_bt_layer = bitmap_layer_create(
-      GRect(0, 0, bounds.size.w, bounds.size.h));
-  bitmap_layer_set_compositing_mode(s_bt_layer, GCompOpSet);
-  bitmap_layer_set_bitmap(s_bt_layer, s_bitmap_bt);
-  layer_add_child(window_layer, bitmap_layer_get_layer(s_bt_layer));
-
-  update_time();
+  s_bt_layer = layer_create(bounds);
+  layer_set_update_proc(s_bt_layer, bt_update_proc);
+  layer_add_child(window_layer, s_bt_layer);
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());
 
@@ -99,17 +198,13 @@ static void prv_window_load(Window *window) {
   s_canvas_layer = layer_create(bounds);
   layer_set_update_proc(s_canvas_layer, canvas_update_proc);
   layer_add_child(window_layer, s_canvas_layer);
-
-  layer_mark_dirty(s_canvas_layer);
 }
 
 static void prv_window_unload(Window *window) {
   text_layer_destroy(s_text_layer_h);
   text_layer_destroy(s_text_layer_m);
-  gbitmap_destroy(s_bitmap_bt);
-  bitmap_layer_destroy(s_bt_layer);
   layer_destroy(s_canvas_layer);
-  gdraw_command_image_destroy(s_command_image);
+  layer_destroy(s_bt_layer);
 }
 
 static void prv_init(void) {
@@ -126,12 +221,6 @@ static void prv_init(void) {
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = bluetooth_callback
   });
-
-  s_command_image = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BRAND);
-  
-  if (!s_command_image) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Image is NULL!");
-  }
 }
 
 static void prv_deinit(void) {
