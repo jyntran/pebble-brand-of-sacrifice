@@ -26,13 +26,13 @@
     "resources": {
       "media": [
         {
-          "characterRegex": "[0-9]",
+          "characterRegex": "[:0-9]",
           "type": "font",
           "name": "FONT_SMALLTYPE_40",
-          "file": "fonts/SmallTypeWritingMedium.ttf"
+          "file": "fonts/SmallTypeWriting.ttf"
         },
         {
-          "characterRegex": "[0-9]",
+          "characterRegex": "[:0-9]",
           "type": "font",
           "name": "FONT_OFFENBACHER_40",
           "file": "fonts/OfenbacherSchwabCAT.ttf"

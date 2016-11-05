@@ -6,7 +6,7 @@
 #define TIME_HEIGHT 42
 
 static Window *s_window;
-static TextLayer *s_text_layer_h, *s_text_layer_m;
+static TextLayer *s_text_layer_h, *s_text_layer_m, *s_text_layer_hm;
 static GFont s_time_font;
 static Layer *s_canvas_layer, *s_bt_layer;
 
@@ -19,9 +19,13 @@ static void update_time() {
                                           "%H" : "%I", tick_time);
   static char s_buffer_mins[8];
   strftime(s_buffer_mins, sizeof(s_buffer_mins), "%M", tick_time);
+  static char s_buffer_time[8];
+  strftime(s_buffer_time, sizeof(s_buffer_time), clock_is_24h_style() ?
+                                          "%H:%M" : "%I:%M", tick_time);
   
   text_layer_set_text(s_text_layer_h, s_buffer_hour);
   text_layer_set_text(s_text_layer_m, s_buffer_mins);
+  text_layer_set_text(s_text_layer_hm, s_buffer_time);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -180,19 +184,32 @@ static void prv_window_load(Window *window) {
 
   s_time_font = fonts_load_custom_font(resource_get_handle(TIME_FONT));
 
+  // top time
+
+  s_text_layer_hm = text_layer_create(grect_inset(GRect(0, 0, bounds.size.w, TIME_HEIGHT), (GEdgeInsets){ .top=0 }));
+/*
+  text_layer_set_text_alignment(s_text_layer_hm, GTextAlignmentCenter);
+  text_layer_set_background_color(s_text_layer_hm, GColorClear);
+  text_layer_set_text_color(s_text_layer_hm, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
+  text_layer_set_font(s_text_layer_hm, s_time_font);
+  layer_add_child(window_layer, text_layer_get_layer(s_text_layer_hm));
+*/
+
   s_text_layer_h = text_layer_create(grect_inset(GRect(0, centre.y-30, bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .right=centre.x/3}));
+  text_layer_set_text_alignment(s_text_layer_h, GTextAlignmentRight);
   text_layer_set_background_color(s_text_layer_h, GColorClear);
   text_layer_set_text_color(s_text_layer_h, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
   text_layer_set_font(s_text_layer_h, s_time_font);
-  text_layer_set_text_alignment(s_text_layer_h, GTextAlignmentRight);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_h));
 
+
   s_text_layer_m = text_layer_create(grect_inset(GRect(centre.x, centre.y-30, bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .left=centre.x/3}));
+  text_layer_set_text_alignment(s_text_layer_m, GTextAlignmentLeft);
   text_layer_set_background_color(s_text_layer_m, GColorClear);
   text_layer_set_text_color(s_text_layer_m, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
   text_layer_set_font(s_text_layer_m, s_time_font);
-  text_layer_set_text_alignment(s_text_layer_m, GTextAlignmentLeft);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_m));
+
 
   // Bluetooth
   s_bt_layer = layer_create(bounds);
@@ -211,6 +228,7 @@ static void prv_window_load(Window *window) {
 static void prv_window_unload(Window *window) {
   text_layer_destroy(s_text_layer_h);
   text_layer_destroy(s_text_layer_m);
+  text_layer_destroy(s_text_layer_hm);
   layer_destroy(s_canvas_layer);
   layer_destroy(s_bt_layer);
   fonts_unload_custom_font(s_time_font);
