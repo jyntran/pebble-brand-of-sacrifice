@@ -1,0 +1,46 @@
+[
+  {
+    "type": "heading",
+    "defaultValue": "Brand of Sacrifice Watchface"
+  },
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "color",
+        "messageKey": "BackgroundColour",
+        "defaultValue": "0x000000",
+        "label": "Background Colour",
+        "description": "Change background colour",
+        "defaultValue": "0x000000"
+      },
+      {
+        "type": "color",
+        "messageKey": "BrandColour",
+        "label": "Brand Colour",
+        "description": "Change brand colour",
+        "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "color",
+        "messageKey": "TimeColour",
+        "label": "Time Colour",
+        "description": "Change time colour",
+        "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "color",
+        "messageKey": "BluetoothColour",
+        "label": "Bluetooth Colour",
+        "description": "Change Bluetooth icon colour",
+        "defaultValue": "0xFF0000"
+      }
+    ]
+  },
+  {
+    "type": "submit",
+    "defaultValue": "Save Settings"
+  }
+]
+
+
