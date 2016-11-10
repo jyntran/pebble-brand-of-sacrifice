@@ -28,18 +28,20 @@
       "BackgroundColour",
       "BrandColour",
       "TimeColour",
-      "BluetoothColour"
+      "BluetoothColour",
+      "ShowTimeAtTop",
+      "ShowDate"
     ],
     "resources": {
       "media": [
         {
-          "characterRegex": "[:0-9]",
+          "characterRegex": "[:0-9/]",
           "type": "font",
           "name": "FONT_SMALLTYPE_40",
           "file": "fonts/SmallTypeWriting.ttf"
         },
         {
-          "characterRegex": "[:0-9]",
+          "characterRegex": "[:0-9/]",
           "type": "font",
           "name": "FONT_OFFENBACHER_40",
           "file": "fonts/OfenbacherSchwabCAT.ttf"
