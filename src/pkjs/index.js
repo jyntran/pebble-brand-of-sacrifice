@@ -1,12 +1,20 @@
 var Clay = require('pebble-clay');
 var clayConfig = require('./config.json');
-var clay = new Clay(clayConfig);
+var clay = new Clay(clayConfig, null, {autoHandleEvents: false});
 var messageKeys = require('message_keys');
 
+Pebble.addEventListener('showConfiguration', function(e) {
+  Pebble.openURL(clay.generateUrl());
+});
+
 Pebble.addEventListener('webviewclosed', function(e) {
-  var claySettings = clay.getSettings(e.response);
-  Pebble.sendAppMessage(claySettings, function() {
-    console.log('Message sent successfully: ' + JSON.stringify(claySettings));
+  var dict = clay.getSettings(e.response);
+
+  // Save int values from Clay settings
+  dict[messageKeys.FontStyle] = parseInt(dict[messageKeys.FontStyle]);
+
+  Pebble.sendAppMessage(dict, function() {
+    console.log('Message sent successfully: ' + JSON.stringify(dict));
   }, function(e) {
     console.log('Message failed: ' + JSON.stringify(e));
   });
