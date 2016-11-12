@@ -1,7 +1,7 @@
 #include "main_window.h"
 
 static Window *s_window;
-static TextLayer *s_text_layer_h, *s_text_layer_m, *s_text_layer_d;
+static TextLayer *s_hour_layer, *s_mins_layer, *s_day_layer, *s_mth_layer;
 static GFont s_time_font, s_date_font;
 static Layer *s_canvas_layer, *s_bt_layer, *s_battery_layer;
 static AppTimer *timer;
@@ -48,13 +48,13 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
   GPathInfo BATT_TOP_INFO = {
     .num_points = 7,
     .points = (GPoint[7]) {
-      {-2, -28},
-      {-8, -36},
-      {-2, -32},
+      {-2 *m , -28},
+      {-6 *m, -36},
+      {-2 *m, -32},
       {0, -42},
-      {2, -32},
-      {8, -36},
-      {2, -28}
+      {2 *m, -32},
+      {6 *m, -36},
+      {2 *m, -28}
     }
   };
 
@@ -71,7 +71,11 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
   }
 
   // Draw background
-  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
+  if (settings.BrandOnly) {
+    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH_LG);
+  } else {
+    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
+  }
   graphics_context_set_stroke_color(ctx, settings.BrandColour);
   graphics_context_set_fill_color(ctx, settings.BrandColour);
   gpath_draw_outline(ctx, s_batt_centre);
@@ -111,34 +115,25 @@ void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 static void update_time() {
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
-  static char s_buffer_hour[8];
+  static char s_buffer_hour[4];
   strftime(s_buffer_hour, sizeof(s_buffer_hour), clock_is_24h_style() ?
                                           "%H" : "%I", tick_time);
-  static char s_buffer_mins[8];
+  static char s_buffer_mins[4];
   strftime(s_buffer_mins, sizeof(s_buffer_mins), "%M", tick_time);
 
   if (settings.ShowDate) {
-  static char s_buffer_date[8];
-  static char *str;
-  if (settings.BrandOnly) {
-    if (settings.DayMonthFormat) {
-      str = "%d %m";
-    } else {
-      str = "%m %d";
-    }
-  } else {
-    if (settings.DayMonthFormat) {
-      str = "%d/%m";
-    } else {
-      str = "%m/%d";
-    }
-  }
-  strftime(s_buffer_date, sizeof(s_buffer_date), str, tick_time);
-  text_layer_set_text(s_text_layer_d, s_buffer_date);
+  static char s_buffer_day[4];
+  strftime(s_buffer_day, sizeof(s_buffer_day), "%d", tick_time);
+
+  static char s_buffer_mth[4];
+  strftime(s_buffer_mth, sizeof(s_buffer_mth), "%m", tick_time);
+
+  text_layer_set_text(s_day_layer, s_buffer_day);
+  text_layer_set_text(s_mth_layer, s_buffer_mth);
   }
 
-  text_layer_set_text(s_text_layer_h, s_buffer_hour);
-  text_layer_set_text(s_text_layer_m, s_buffer_mins);
+  text_layer_set_text(s_hour_layer, s_buffer_hour);
+  text_layer_set_text(s_mins_layer, s_buffer_mins);
 }
 
 void prv_window_update() {
@@ -184,7 +179,7 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
       {25 * m, 20 * m},
       {0, 0},
       {25 * m, -24 * m},
-      {16 * m, -32 * m}
+      {14 * m, -36 * m},
     }
   };
 
@@ -222,7 +217,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
     .num_points = 9,
     .points = (GPoint[9]) {
       // Left
-      {-16 * m, -32 * m},
+      {-14 * m, -36 * m},
       {-25 * m, -24 *m},
       {0 * m, 0 * m},
       {-25 * m, 20 * m},
@@ -232,7 +227,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
       {25 * m, 20 * m},
       {0 * m, 0 * m},
       {25 * m, -24 * m},
-      {16 * m, -32 * m}
+      {14 * m, -36 * m}
     }
   };
 
@@ -261,34 +256,77 @@ static void prv_window_load(Window *window) {
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   window_set_background_color(s_window, settings.BackgroundColour);
 
-  s_time_font = fonts_load_custom_font(resource_get_handle(TIME_FONT));
-  s_date_font = fonts_load_custom_font(resource_get_handle(DATE_FONT));
+  uint32_t TIME_PADDING = settings.FontStyle == OLDE ? OLDE_TIME_PADDING : NEUE_TIME_PADDING;
+  //uint32_t DATE_PADDING = settings.FontStyle == OLDE ? OLDE_DATE_PADDING : NEUE_DATE_PADDING;
+  uint32_t DATE_OFFSET = settings.FontStyle == OLDE ? OLDE_DATE_OFFSET : NEUE_DATE_OFFSET;
 
-  s_text_layer_h = text_layer_create(grect_inset(GRect(0, centre.y-TIME_PADDING_TOP-(TIME_HEIGHT/4), bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .right=centre.x/3}));
-  text_layer_set_text_alignment(s_text_layer_h, GTextAlignmentRight);
-  text_layer_set_background_color(s_text_layer_h, GColorClear);
-  text_layer_set_text_color(s_text_layer_h, settings.TimeColour);
-  text_layer_set_font(s_text_layer_h, s_time_font);
-  layer_add_child(window_layer, text_layer_get_layer(s_text_layer_h));
+  if (settings.FontStyle == OLDE) {
+    s_time_font = fonts_load_custom_font(resource_get_handle(OLDE_TIME_FONT));
+    s_date_font = fonts_load_custom_font(resource_get_handle(OLDE_DATE_FONT)); 
+  } else {
+    s_time_font = fonts_load_custom_font(resource_get_handle(NEUE_TIME_FONT));
+    s_date_font = fonts_load_custom_font(resource_get_handle(NEUE_DATE_FONT));
+  }
 
-  s_text_layer_m = text_layer_create(grect_inset(GRect(centre.x, centre.y-TIME_PADDING_TOP-(TIME_HEIGHT/4), bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .left=centre.x/3}));
-  text_layer_set_text_alignment(s_text_layer_m, GTextAlignmentLeft);
-  text_layer_set_background_color(s_text_layer_m, GColorClear);
-  text_layer_set_text_color(s_text_layer_m, settings.TimeColour);
-  text_layer_set_font(s_text_layer_m, s_time_font);
-  layer_add_child(window_layer, text_layer_get_layer(s_text_layer_m));
+  s_hour_layer = text_layer_create(grect_inset(GRect(0, centre.y-TIME_PADDING-(TIME_HEIGHT/4), bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .right=centre.x/3}));
+  text_layer_set_text_alignment(s_hour_layer, GTextAlignmentRight);
+  text_layer_set_background_color(s_hour_layer, GColorClear);
+  text_layer_set_text_color(s_hour_layer, settings.TimeColour);
+  text_layer_set_font(s_hour_layer, s_time_font);
+  layer_add_child(window_layer, text_layer_get_layer(s_hour_layer));
+
+  s_mins_layer = text_layer_create(grect_inset(GRect(centre.x, centre.y-TIME_PADDING-(TIME_HEIGHT/4), bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .left=centre.x/3}));
+  text_layer_set_text_alignment(s_mins_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(s_mins_layer, GColorClear);
+  text_layer_set_text_color(s_mins_layer, settings.TimeColour);
+  text_layer_set_font(s_mins_layer, s_time_font);
+  layer_add_child(window_layer, text_layer_get_layer(s_mins_layer));
 
   if (settings.ShowDate) {
-    if (settings.BrandOnly) {
-      s_text_layer_d = text_layer_create(grect_inset(GRect(0, centre.y+(DATE_HEIGHT/2), bounds.size.w, DATE_HEIGHT), (GEdgeInsets){ .top=0 }));
-    } else {
-      s_text_layer_d = text_layer_create(grect_inset(GRect(0, centre.y+DATE_HEIGHT, bounds.size.w, DATE_HEIGHT), (GEdgeInsets){ .top=0 }));
-    }
-    text_layer_set_text_alignment(s_text_layer_d, GTextAlignmentCenter);
-    text_layer_set_background_color(s_text_layer_d, GColorClear);
-    text_layer_set_text_color(s_text_layer_d, settings.DateColour);
-    text_layer_set_font(s_text_layer_d, s_date_font);
-    layer_add_child(window_layer, text_layer_get_layer(s_text_layer_d));
+
+    GRect leftDate = grect_inset(
+      GRect(
+        centre.x/2,
+        centre.y+(DATE_HEIGHT/2)+DATE_OFFSET,
+        bounds.size.w/4,
+        DATE_HEIGHT
+      ),
+      (GEdgeInsets){
+        .left=4,
+        .right=2
+    });
+    GRect rightDate = grect_inset(
+      GRect(
+        centre.x,
+        centre.y+(DATE_HEIGHT/2)+DATE_OFFSET,
+        bounds.size.w/4,
+        DATE_HEIGHT
+      ),
+      (GEdgeInsets){
+        .left=2,
+        .right=4
+    });
+
+  if (settings.DayMonthFormat) {
+    s_day_layer = text_layer_create(leftDate);
+    s_mth_layer = text_layer_create(rightDate);
+  } else {
+    s_mth_layer = text_layer_create(leftDate);
+    s_day_layer = text_layer_create(rightDate);
+  }
+
+  text_layer_set_text_alignment(s_day_layer, GTextAlignmentCenter);
+  text_layer_set_background_color(s_day_layer, GColorClear);
+  text_layer_set_text_color(s_day_layer, settings.DateColour);
+  text_layer_set_font(s_day_layer, s_date_font);
+  layer_add_child(window_layer, text_layer_get_layer(s_day_layer));
+
+  text_layer_set_text_alignment(s_mth_layer, GTextAlignmentCenter);
+  text_layer_set_background_color(s_mth_layer, GColorClear);
+  text_layer_set_text_color(s_mth_layer, settings.DateColour);
+  text_layer_set_font(s_mth_layer, s_date_font);
+  layer_add_child(window_layer, text_layer_get_layer(s_mth_layer));
+
   }
 
   // Bluetooth
@@ -313,9 +351,10 @@ static void prv_window_load(Window *window) {
 }
 
 static void prv_window_unload(Window *window) {
-  text_layer_destroy(s_text_layer_h);
-  text_layer_destroy(s_text_layer_m);
-  text_layer_destroy(s_text_layer_d);
+  text_layer_destroy(s_hour_layer);
+  text_layer_destroy(s_mins_layer);
+  text_layer_destroy(s_day_layer);
+  text_layer_destroy(s_mth_layer);
   layer_destroy(s_canvas_layer);
   layer_destroy(s_bt_layer);
   layer_destroy(s_battery_layer);

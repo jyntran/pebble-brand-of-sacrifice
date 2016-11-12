@@ -1,5 +1,5 @@
 {
-  "name": "Brand of Sacrifice",
+  "name": "brand-of-sacrifice",
   "author": "jyntran",
   "version": "1.0.0",
   "keywords": [
@@ -10,7 +10,7 @@
     "pebble-clay": "^1.0.3"
   },
   "pebble": {
-    "displayName": "brand-of-sacrifice",
+    "displayName": "Brand of Sacrifice",
     "uuid": "9e7661b3-d9b1-48ac-9f09-cb0e6cf52119",
     "sdkVersion": "3",
     "enableMultiJS": true,
@@ -34,7 +34,8 @@
       "BluetoothColour",
       "ShowDate",
       "DayMonthFormat",
-      "BrandOnly"
+      "BrandOnly",
+      "FontStyle"
     ],
     "resources": {
       "media": [
@@ -56,6 +57,18 @@
           "type": "font",
           "name": "FONT_OLDEENGLISH_48",
           "file": "fonts/OldeEnglish.ttf"
+        },
+        {
+          "characterRegex": "[:0-9/ ]",
+          "type": "font",
+          "name": "FONT_BLACKFOREST_28",
+          "file": "fonts/BlackForest.ttf"
+        },
+        {
+          "characterRegex": "[:0-9/ ]",
+          "type": "font",
+          "name": "FONT_BLACKFOREST_42",
+          "file": "fonts/BlackForest.ttf"
         }
       ]
     }

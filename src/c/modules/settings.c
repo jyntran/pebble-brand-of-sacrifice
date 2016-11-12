@@ -13,6 +13,7 @@ static void prv_default_settings() {
   settings.ShowDate = false;
   settings.DayMonthFormat = false;
   settings.BrandOnly = false;
+  settings.FontStyle = 1;
 }
 
 static void prv_save_settings() {
@@ -68,6 +69,11 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *bo_bool_t = dict_find(iter, MESSAGE_KEY_BrandOnly);
   if (bo_bool_t) {
     settings.BrandOnly = bo_bool_t->value->int32 == 1;
+  }
+
+  Tuple *fs_val_t = dict_find(iter, MESSAGE_KEY_FontStyle);
+  if (fs_val_t) {
+    settings.FontStyle = fs_val_t->value->int32;
   }
 
   prv_save_settings();

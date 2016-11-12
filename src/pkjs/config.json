@@ -77,6 +77,17 @@
         "label": "Brand Only",
         "description": "Show only the brand",
         "defaultValue": false
+      },
+      {
+        "type": "select",
+        "messageKey": "FontStyle",
+        "label": "Font Style",
+        "description": "Select font style",
+        "defaultValue": 1,
+        "options": [
+          { "label": "Olde", "value": 1 },
+          { "label": "Neue", "value": 2 }
+        ]
       }
     ]
   },

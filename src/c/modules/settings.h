@@ -14,6 +14,7 @@ typedef struct ClaySettings {
   bool ShowDate;
   bool DayMonthFormat;
   bool BrandOnly;
+  int FontStyle;
 } ClaySettings;
 
 struct ClaySettings settings;
