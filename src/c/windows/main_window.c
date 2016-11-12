@@ -36,9 +36,9 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
   GPathInfo BATT_BAR_INFO = {
     .num_points = 6,
     .points = (GPoint[6]) {
-      {-1, 39 * m},
-      {0, 40 * m},
-      {1, 39 * m},
+      {-1, 38 * m},
+      {0, 39 * m},
+      {1, 38 * m},
       {1, (39 * m)-height},
       {0, (38 * m)-height},
       {-1, (39 * m)-height}
@@ -116,18 +116,29 @@ static void update_time() {
                                           "%H" : "%I", tick_time);
   static char s_buffer_mins[8];
   strftime(s_buffer_mins, sizeof(s_buffer_mins), "%M", tick_time);
-  static char s_buffer_time[8];
-  strftime(s_buffer_time, sizeof(s_buffer_time), clock_is_24h_style() ?
-                                          "%H:%M" : "%I:%M", tick_time);
-  static char s_buffer_date[8];
-  strftime(s_buffer_date, sizeof(s_buffer_date), "%m %d", tick_time);
-  
-  text_layer_set_text(s_text_layer_h, s_buffer_hour);
-  text_layer_set_text(s_text_layer_m, s_buffer_mins);
 
   if (settings.ShowDate) {
-    text_layer_set_text(s_text_layer_d, s_buffer_date);
+  static char s_buffer_date[8];
+  static char *str;
+  if (settings.BrandOnly) {
+    if (settings.DayMonthFormat) {
+      str = "%d %m";
+    } else {
+      str = "%m %d";
+    }
+  } else {
+    if (settings.DayMonthFormat) {
+      str = "%d/%m";
+    } else {
+      str = "%m/%d";
+    }
   }
+  strftime(s_buffer_date, sizeof(s_buffer_date), str, tick_time);
+  text_layer_set_text(s_text_layer_d, s_buffer_date);
+  }
+
+  text_layer_set_text(s_text_layer_h, s_buffer_hour);
+  text_layer_set_text(s_text_layer_m, s_buffer_mins);
 }
 
 void prv_window_update() {
@@ -268,12 +279,16 @@ static void prv_window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_m));
 
   if (settings.ShowDate) {
-  s_text_layer_d = text_layer_create(grect_inset(GRect(0, centre.y+(DATE_HEIGHT/2), bounds.size.w, DATE_HEIGHT), (GEdgeInsets){ .top=0 }));
-  text_layer_set_text_alignment(s_text_layer_d, GTextAlignmentCenter);
-  text_layer_set_background_color(s_text_layer_d, GColorClear);
-  text_layer_set_text_color(s_text_layer_d, settings.DateColour);
-  text_layer_set_font(s_text_layer_d, s_date_font);
-  layer_add_child(window_layer, text_layer_get_layer(s_text_layer_d));
+    if (settings.BrandOnly) {
+      s_text_layer_d = text_layer_create(grect_inset(GRect(0, centre.y+(DATE_HEIGHT/2), bounds.size.w, DATE_HEIGHT), (GEdgeInsets){ .top=0 }));
+    } else {
+      s_text_layer_d = text_layer_create(grect_inset(GRect(0, centre.y+DATE_HEIGHT, bounds.size.w, DATE_HEIGHT), (GEdgeInsets){ .top=0 }));
+    }
+    text_layer_set_text_alignment(s_text_layer_d, GTextAlignmentCenter);
+    text_layer_set_background_color(s_text_layer_d, GColorClear);
+    text_layer_set_text_color(s_text_layer_d, settings.DateColour);
+    text_layer_set_font(s_text_layer_d, s_date_font);
+    layer_add_child(window_layer, text_layer_get_layer(s_text_layer_d));
   }
 
   // Bluetooth

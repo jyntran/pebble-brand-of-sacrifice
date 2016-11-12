@@ -33,6 +33,7 @@
       "BatteryOutline",
       "BluetoothColour",
       "ShowDate",
+      "DayMonthFormat",
       "BrandOnly"
     ],
     "resources": {

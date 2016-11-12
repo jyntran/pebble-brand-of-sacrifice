@@ -12,6 +12,7 @@ typedef struct ClaySettings {
   bool BatteryOutline;
   GColor BluetoothColour;
   bool ShowDate;
+  bool DayMonthFormat;
   bool BrandOnly;
 } ClaySettings;
 

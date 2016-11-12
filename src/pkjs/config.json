@@ -66,6 +66,13 @@
       },
       {
         "type": "toggle",
+        "messageKey": "DayMonthFormat",
+        "label": "Use Day/Month Format",
+        "description": "Display date as Day/Month",
+        "defaultValue": false
+      },
+      {
+        "type": "toggle",
         "messageKey": "BrandOnly",
         "label": "Brand Only",
         "description": "Show only the brand",
