@@ -9,6 +9,7 @@ static void prv_default_settings() {
   settings.BluetoothColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.ShowTimeAtTop = false;
   settings.ShowDate = false;
+  settings.BrandOnly = false;
 }
 
 static void prv_save_settings() {
@@ -44,6 +45,11 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *dt_bool_t = dict_find(iter, MESSAGE_KEY_ShowDate);
   if (dt_bool_t) {
     settings.ShowDate = dt_bool_t->value->int32 == 1;
+  }
+
+  Tuple *bo_bool_t = dict_find(iter, MESSAGE_KEY_BrandOnly);
+  if (bo_bool_t) {
+    settings.BrandOnly = bo_bool_t->value->int32 == 1;
   }
 
   prv_save_settings();

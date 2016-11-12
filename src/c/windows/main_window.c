@@ -53,29 +53,36 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
+  uint32_t m; // multiplier
+  if (settings.BrandOnly) {
+    m = 2;
+  } else {
+    m = 1;
+  }
+
   GPathInfo BT_PATH_INFO = {
     .num_points = 9,
     .points = (GPoint[9]) {
       // Left
-      {-25, -24},
+      {-25 * m, -24 *m},
       {0, 0},
-      {-25, 20},
+      {-25 * m, 20 * m},
       {0, 0},
       // Middle
-      {0, 40},
+      {0, 40 * m},
       // Right
-      {25, 20},
+      {25 * m, 20 * m},
       {0, 0},
-      {25, -24},
-      {16, -32}
+      {25 * m, -24 * m},
+      {16 * m, -32 * m}
     }
   };
 
   GPathInfo BT_CENTRE_INFO = {
     .num_points = 2,
     .points = (GPoint[2]) {
-      {0, 40},
-      {0, -36}
+      {0, 40 * m},
+      {0, -36 * m}
     }
   };
 
@@ -98,12 +105,20 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
 
   gpath_move_to(s_bt_path, centre);
   gpath_move_to(s_bt_centre, centre);
-  gpath_move_to(s_bt_top, centre);
+  if (settings.BrandOnly) {
+    gpath_move_to(s_bt_top, (GPoint){centre.x, centre.y/2+2});
+  } else {
+    gpath_move_to(s_bt_top, centre);
+  }
 
   graphics_context_set_stroke_color(ctx, settings.BluetoothColour);
   graphics_context_set_fill_color(ctx, settings.BluetoothColour);
-  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
-
+  if (settings.BrandOnly) {
+    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH_LG);
+  } else {
+    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
+  }
+ 
   gpath_draw_outline_open(ctx, s_bt_path);
   gpath_draw_outline_open(ctx, s_bt_centre);
   gpath_draw_filled(ctx, s_bt_top);
@@ -119,29 +134,36 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
+  uint32_t m; // multiplier
+  if (settings.BrandOnly) {
+    m = 2;
+  } else {
+    m = 1;
+  }
+
   GPathInfo BRAND_PATH_INFO = {
     .num_points = 9,
     .points = (GPoint[9]) {
       // Left
-      {-16, -32},
-      {-25, -24},
-      {0, 0},
-      {-25, 20},
+      {-16 * m, -32 * m},
+      {-25 * m, -24 *m},
+      {0 * m, 0 * m},
+      {-25 * m, 20 * m},
       // Middle
-      {0, 40},
+      {0 * m, 40 * m},
       // Right
-      {25, 20},
-      {0, 0},
-      {25, -24},
-      {16, -32}
+      {25 * m, 20 * m},
+      {0 * m, 0 * m},
+      {25 * m, -24 * m},
+      {16 * m, -32 * m}
     }
   };
 
   GPathInfo BRAND_CENTRE_INFO = {
     .num_points = 2,
     .points = (GPoint[2]) {
-      {0, 40},
-      {0, -36}
+      {0 * m, 40 * m},
+      {0 * m, -36 * m}
     }
   };
 
@@ -164,12 +186,20 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
 
   gpath_move_to(s_brand_path, centre);
   gpath_move_to(s_brand_centre, centre);
-  gpath_move_to(s_brand_top, centre);
+  if (settings.BrandOnly) {
+    gpath_move_to(s_brand_top, (GPoint){centre.x, centre.y/2+2});
+  } else {
+    gpath_move_to(s_brand_top, centre);
+  } 
 
   graphics_context_set_stroke_color(ctx, settings.BrandColour);
   graphics_context_set_fill_color(ctx, settings.BrandColour);
-  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
-
+  if (settings.BrandOnly) {
+    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH_LG);
+  } else {
+    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
+  }
+ 
   gpath_draw_outline_open(ctx, s_brand_path);
   gpath_draw_outline(ctx, s_brand_centre);
   gpath_draw_filled(ctx, s_brand_top);

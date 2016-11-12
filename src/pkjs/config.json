@@ -34,6 +34,27 @@
         "label": "Bluetooth Colour",
         "description": "Change Bluetooth icon colour",
         "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "ShowTimeAtTop",
+        "label": "Show Time At Top",
+        "description": "Show time above brand",
+        "defaultValue": false
+      },
+      {
+        "type": "toggle",
+        "messageKey": "ShowDate",
+        "label": "Show Date",
+        "description": "Show date below brand",
+        "defaultValue": false
+      },
+      {
+        "type": "toggle",
+        "messageKey": "BrandOnly",
+        "label": "Brand Only",
+        "description": "Show only the brand",
+        "defaultValue": false
       }
     ]
   },

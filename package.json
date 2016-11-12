@@ -30,7 +30,8 @@
       "TimeColour",
       "BluetoothColour",
       "ShowTimeAtTop",
-      "ShowDate"
+      "ShowDate",
+      "BrandOnly"
     ],
     "resources": {
       "media": [
