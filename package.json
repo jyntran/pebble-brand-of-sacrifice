@@ -28,24 +28,24 @@
       "BackgroundColour",
       "BrandColour",
       "TimeColour",
+      "DateColour",
       "BluetoothColour",
-      "ShowTimeAtTop",
       "ShowDate",
       "BrandOnly"
     ],
     "resources": {
       "media": [
         {
-          "characterRegex": "[:0-9/]",
+          "characterRegex": "[:0-9/ ]",
           "type": "font",
-          "name": "FONT_SMALLTYPE_40",
-          "file": "fonts/SmallTypeWriting.ttf"
+          "name": "FONT_OLDEENGLISH_32",
+          "file": "fonts/OldeEnglish.ttf"
         },
         {
-          "characterRegex": "[:0-9/]",
+          "characterRegex": "[:0-9/ ]",
           "type": "font",
-          "name": "FONT_OFFENBACHER_40",
-          "file": "fonts/OfenbacherSchwabCAT.ttf"
+          "name": "FONT_OLDEENGLISH_48",
+          "file": "fonts/OldeEnglish.ttf"
         }
       ]
     }

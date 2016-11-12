@@ -30,17 +30,17 @@
       },
       {
         "type": "color",
+        "messageKey": "DateColour",
+        "label": "Date Colour",
+        "description": "Change date colour",
+        "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "color",
         "messageKey": "BluetoothColour",
         "label": "Bluetooth Colour",
         "description": "Change Bluetooth icon colour",
         "defaultValue": "0xFF0000"
-      },
-      {
-        "type": "toggle",
-        "messageKey": "ShowTimeAtTop",
-        "label": "Show Time At Top",
-        "description": "Show time above brand",
-        "defaultValue": false
       },
       {
         "type": "toggle",

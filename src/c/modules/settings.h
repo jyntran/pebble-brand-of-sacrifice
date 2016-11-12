@@ -7,8 +7,8 @@ typedef struct ClaySettings {
   GColor BackgroundColour;
   GColor BrandColour;
   GColor TimeColour;
+  GColor DateColour;
   GColor BluetoothColour;
-  bool ShowTimeAtTop;
   bool ShowDate;
   bool BrandOnly;
 } ClaySettings;

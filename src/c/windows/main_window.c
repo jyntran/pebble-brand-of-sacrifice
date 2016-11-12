@@ -1,9 +1,20 @@
 #include "main_window.h"
 
 static Window *s_window;
-static TextLayer *s_text_layer_h, *s_text_layer_m, *s_text_layer_hm, *s_text_layer_d;
-static GFont s_time_font;
+static TextLayer *s_text_layer_h, *s_text_layer_m, *s_text_layer_d;
+static GFont s_time_font, s_date_font;
 static Layer *s_canvas_layer, *s_bt_layer;
+static AppTimer *timer;
+
+static void timer_callback(void *data) {
+//  layer_remove_from_parent((Layer *)s_text_layer_d);
+}
+
+void accel_tap_handler(AccelAxisType axis, int32_t direction) {
+//  layer_insert_above_sibling((Layer *)s_text_layer_d, (Layer *)s_canvas_layer);
+  timer = app_timer_register(3000, (AppTimerCallback)timer_callback, NULL);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Tap");
+}
 
 static void update_time() {
   time_t temp = time(NULL);
@@ -17,14 +28,10 @@ static void update_time() {
   strftime(s_buffer_time, sizeof(s_buffer_time), clock_is_24h_style() ?
                                           "%H:%M" : "%I:%M", tick_time);
   static char s_buffer_date[8];
-  strftime(s_buffer_date, sizeof(s_buffer_date), "%m/%d", tick_time);
+  strftime(s_buffer_date, sizeof(s_buffer_date), "%m %d", tick_time);
   
-  if (settings.ShowTimeAtTop) {
-    text_layer_set_text(s_text_layer_hm, s_buffer_time);
-  } else {
-    text_layer_set_text(s_text_layer_h, s_buffer_hour);
-    text_layer_set_text(s_text_layer_m, s_buffer_mins);
-  }
+  text_layer_set_text(s_text_layer_h, s_buffer_hour);
+  text_layer_set_text(s_text_layer_m, s_buffer_mins);
 
   if (settings.ShowDate) {
     text_layer_set_text(s_text_layer_d, s_buffer_date);
@@ -218,42 +225,37 @@ static void prv_window_load(Window *window) {
   window_set_background_color(s_window, settings.BackgroundColour);
 
   s_time_font = fonts_load_custom_font(resource_get_handle(TIME_FONT));
+  s_date_font = fonts_load_custom_font(resource_get_handle(DATE_FONT));
 
-  // top time
-
-  if (settings.ShowTimeAtTop) {
-
+/*
   s_text_layer_hm = text_layer_create(grect_inset(GRect(0, 0, bounds.size.w, TIME_HEIGHT), (GEdgeInsets){ .top=0 }));
   text_layer_set_text_alignment(s_text_layer_hm, GTextAlignmentCenter);
   text_layer_set_background_color(s_text_layer_hm, GColorClear);
   text_layer_set_text_color(s_text_layer_hm, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
   text_layer_set_font(s_text_layer_hm, s_time_font);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_hm));
+*/
 
-  } else {
-
-  s_text_layer_h = text_layer_create(grect_inset(GRect(0, centre.y-30, bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .right=centre.x/3}));
+  s_text_layer_h = text_layer_create(grect_inset(GRect(0, centre.y-TIME_PADDING_TOP-(TIME_HEIGHT/4), bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .right=centre.x/3}));
   text_layer_set_text_alignment(s_text_layer_h, GTextAlignmentRight);
   text_layer_set_background_color(s_text_layer_h, GColorClear);
   text_layer_set_text_color(s_text_layer_h, settings.TimeColour);
   text_layer_set_font(s_text_layer_h, s_time_font);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_h));
 
-  s_text_layer_m = text_layer_create(grect_inset(GRect(centre.x, centre.y-30, bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .left=centre.x/3}));
+  s_text_layer_m = text_layer_create(grect_inset(GRect(centre.x, centre.y-TIME_PADDING_TOP-(TIME_HEIGHT/4), bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .left=centre.x/3}));
   text_layer_set_text_alignment(s_text_layer_m, GTextAlignmentLeft);
   text_layer_set_background_color(s_text_layer_m, GColorClear);
   text_layer_set_text_color(s_text_layer_m, settings.TimeColour);
   text_layer_set_font(s_text_layer_m, s_time_font);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_m));
 
-  }
-
   if (settings.ShowDate) {
-  s_text_layer_d = text_layer_create(grect_inset(GRect(0, bounds.size.h-TIME_HEIGHT, bounds.size.w, TIME_HEIGHT), (GEdgeInsets){ .top=0 }));
+  s_text_layer_d = text_layer_create(grect_inset(GRect(0, centre.y+(DATE_HEIGHT/2), bounds.size.w, DATE_HEIGHT), (GEdgeInsets){ .top=0 }));
   text_layer_set_text_alignment(s_text_layer_d, GTextAlignmentCenter);
   text_layer_set_background_color(s_text_layer_d, GColorClear);
-  text_layer_set_text_color(s_text_layer_d, settings.TimeColour);
-  text_layer_set_font(s_text_layer_d, s_time_font);
+  text_layer_set_text_color(s_text_layer_d, settings.DateColour);
+  text_layer_set_font(s_text_layer_d, s_date_font);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer_d));
   }
 
@@ -276,11 +278,11 @@ static void prv_window_load(Window *window) {
 static void prv_window_unload(Window *window) {
   text_layer_destroy(s_text_layer_h);
   text_layer_destroy(s_text_layer_m);
-  text_layer_destroy(s_text_layer_hm);
   text_layer_destroy(s_text_layer_d);
   layer_destroy(s_canvas_layer);
   layer_destroy(s_bt_layer);
   fonts_unload_custom_font(s_time_font);
+  fonts_unload_custom_font(s_date_font);
   if (s_window) { window_destroy(s_window); }
 }
 

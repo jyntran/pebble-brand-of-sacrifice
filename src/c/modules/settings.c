@@ -1,13 +1,13 @@
 #include "settings.h"
 
-struct ClaySettings settings;
+//struct ClaySettings settings;
 
 static void prv_default_settings() {
   settings.BackgroundColour = GColorBlack;
   settings.BrandColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.TimeColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
+  settings.DateColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.BluetoothColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
-  settings.ShowTimeAtTop = false;
   settings.ShowDate = false;
   settings.BrandOnly = false;
 }
@@ -32,14 +32,14 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     settings.TimeColour = GColorFromHEX(tm_colour_t->value->int32);
   }
 
+  Tuple *dt_colour_t = dict_find(iter, MESSAGE_KEY_DateColour);
+  if (dt_colour_t) {
+    settings.DateColour = GColorFromHEX(dt_colour_t->value->int32);
+  }
+
   Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_BluetoothColour);
   if (bt_colour_t) {
     settings.BluetoothColour = GColorFromHEX(bt_colour_t->value->int32);
-  }
-
-  Tuple *ttop_bool_t = dict_find(iter, MESSAGE_KEY_ShowTimeAtTop);
-  if (ttop_bool_t) {
-    settings.ShowTimeAtTop = ttop_bool_t->value->int32 == 1;
   }
 
   Tuple *dt_bool_t = dict_find(iter, MESSAGE_KEY_ShowDate);
@@ -60,7 +60,7 @@ void prv_load_settings() {
   persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));
 
   app_message_register_inbox_received(prv_inbox_received_handler);
-  app_message_open(64, 64);
+  app_message_open(128, 128);
 }
 
 

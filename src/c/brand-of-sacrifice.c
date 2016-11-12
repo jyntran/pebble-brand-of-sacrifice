@@ -15,10 +15,13 @@ static void prv_init(void) {
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = bluetooth_callback
   });
+
+  accel_tap_service_subscribe(accel_tap_handler);
 }
 
 static void prv_deinit(void) {
   tick_timer_service_unsubscribe();
+  accel_tap_service_unsubscribe();
 }
 
 int main(void) {
