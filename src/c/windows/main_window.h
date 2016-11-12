@@ -16,4 +16,4 @@ void prv_window_push();
 void prv_window_update();
 void bluetooth_callback(bool connected);
 void accel_tap_handler(AccelAxisType axis, int32_t direction);
-
+void battery_callback(BatteryChargeState state);

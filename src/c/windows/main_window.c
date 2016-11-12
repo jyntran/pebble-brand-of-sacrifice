@@ -3,8 +3,100 @@
 static Window *s_window;
 static TextLayer *s_text_layer_h, *s_text_layer_m, *s_text_layer_d;
 static GFont s_time_font, s_date_font;
-static Layer *s_canvas_layer, *s_bt_layer;
+static Layer *s_canvas_layer, *s_bt_layer, *s_battery_layer;
 static AppTimer *timer;
+static int s_battery_level;
+
+void battery_callback(BatteryChargeState state) {
+  s_battery_level = state.charge_percent;
+  layer_mark_dirty(s_battery_layer);
+}
+
+static void battery_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+
+  uint32_t m; // multiplier
+  if (settings.BrandOnly) {
+    m = 2;
+  } else {
+    m = 1;
+  }
+
+  int height = (s_battery_level * (73*m)) / 100;
+
+  GPathInfo BATT_CENTRE_INFO = {
+    .num_points = 2,
+    .points = (GPoint[2]) {
+      {0, 38 * m},
+      {0, -36 * m}
+    }
+  };
+
+  GPathInfo BATT_BAR_INFO = {
+    .num_points = 6,
+    .points = (GPoint[6]) {
+      {-1, 39 * m},
+      {0, 40 * m},
+      {1, 39 * m},
+      {1, (39 * m)-height},
+      {0, (38 * m)-height},
+      {-1, (39 * m)-height}
+    }
+  };
+
+  GPathInfo BATT_TOP_INFO = {
+    .num_points = 7,
+    .points = (GPoint[7]) {
+      {-2, -28},
+      {-8, -36},
+      {-2, -32},
+      {0, -42},
+      {2, -32},
+      {8, -36},
+      {2, -28}
+    }
+  };
+
+  GPath *s_batt_centre = gpath_create(&BATT_CENTRE_INFO);
+  GPath *s_batt_bar = gpath_create(&BATT_BAR_INFO);
+  GPath *s_batt_top = gpath_create(&BATT_TOP_INFO);
+
+  gpath_move_to(s_batt_centre, centre);
+  gpath_move_to(s_batt_bar, centre);
+  if (settings.BrandOnly) {
+    gpath_move_to(s_batt_top, (GPoint){centre.x, centre.y/2+2});
+  } else {
+    gpath_move_to(s_batt_top, centre);
+  }
+
+  // Draw background
+  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
+  graphics_context_set_stroke_color(ctx, settings.BrandColour);
+  graphics_context_set_fill_color(ctx, settings.BrandColour);
+  gpath_draw_outline(ctx, s_batt_centre);
+  gpath_draw_filled(ctx, s_batt_top);
+  graphics_context_set_stroke_width(ctx, 1);
+  gpath_draw_outline_open(ctx, s_batt_top);
+
+  if (!settings.BatteryOutline) {
+    graphics_context_set_stroke_color(ctx, settings.BatteryColour);
+  }
+  graphics_context_set_fill_color(ctx, settings.BatteryColour);
+
+  // Draw bar
+  gpath_draw_filled(ctx, s_batt_bar);
+  gpath_draw_outline(ctx, s_batt_bar);
+  
+  if (s_battery_level == 100) {
+    gpath_draw_filled(ctx, s_batt_top);
+    gpath_draw_outline_open(ctx, s_batt_top);
+  }
+  
+  gpath_destroy(s_batt_centre);
+  gpath_destroy(s_batt_bar);
+  gpath_destroy(s_batt_top);
+}
 
 static void timer_callback(void *data) {
 //  layer_remove_from_parent((Layer *)s_text_layer_d);
@@ -85,39 +177,10 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
     }
   };
 
-  GPathInfo BT_CENTRE_INFO = {
-    .num_points = 2,
-    .points = (GPoint[2]) {
-      {0, 40 * m},
-      {0, -36 * m}
-    }
-  };
-
-  GPathInfo BT_TOP_INFO = {
-    .num_points = 7,
-    .points = (GPoint[7]) {
-      {-3, -32},
-      {-8, -40},
-      {-2, -36},
-      {0, -46},
-      {2, -36},
-      {8, -40},
-      {3, -32}
-    }
-  };
-
   GPath *s_bt_path = gpath_create(&BT_PATH_INFO);
-  GPath *s_bt_centre = gpath_create(&BT_CENTRE_INFO);
-  GPath *s_bt_top = gpath_create(&BT_TOP_INFO);
 
   gpath_move_to(s_bt_path, centre);
-  gpath_move_to(s_bt_centre, centre);
-  if (settings.BrandOnly) {
-    gpath_move_to(s_bt_top, (GPoint){centre.x, centre.y/2+2});
-  } else {
-    gpath_move_to(s_bt_top, centre);
-  }
-
+ 
   graphics_context_set_stroke_color(ctx, settings.BluetoothColour);
   graphics_context_set_fill_color(ctx, settings.BluetoothColour);
   if (settings.BrandOnly) {
@@ -127,12 +190,8 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
   }
  
   gpath_draw_outline_open(ctx, s_bt_path);
-  gpath_draw_outline_open(ctx, s_bt_centre);
-  gpath_draw_filled(ctx, s_bt_top);
-
+ 
   gpath_destroy(s_bt_path);
-  gpath_destroy(s_bt_centre);
-  gpath_destroy(s_bt_top);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawn BT");
 }
@@ -166,38 +225,9 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
     }
   };
 
-  GPathInfo BRAND_CENTRE_INFO = {
-    .num_points = 2,
-    .points = (GPoint[2]) {
-      {0 * m, 40 * m},
-      {0 * m, -36 * m}
-    }
-  };
-
-  GPathInfo BRAND_TOP_INFO = {
-    .num_points = 7,
-    .points = (GPoint[7]) {
-      {-3, -32},
-      {-8, -40},
-      {-2, -36},
-      {0, -46},
-      {2, -36},
-      {8, -40},
-      {3, -32}
-    }
-  };
-
   GPath *s_brand_path = gpath_create(&BRAND_PATH_INFO);
-  GPath *s_brand_centre = gpath_create(&BRAND_CENTRE_INFO);
-  GPath *s_brand_top = gpath_create(&BRAND_TOP_INFO);
 
   gpath_move_to(s_brand_path, centre);
-  gpath_move_to(s_brand_centre, centre);
-  if (settings.BrandOnly) {
-    gpath_move_to(s_brand_top, (GPoint){centre.x, centre.y/2+2});
-  } else {
-    gpath_move_to(s_brand_top, centre);
-  } 
 
   graphics_context_set_stroke_color(ctx, settings.BrandColour);
   graphics_context_set_fill_color(ctx, settings.BrandColour);
@@ -208,12 +238,8 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   }
  
   gpath_draw_outline_open(ctx, s_brand_path);
-  gpath_draw_outline(ctx, s_brand_centre);
-  gpath_draw_filled(ctx, s_brand_top);
 
   gpath_destroy(s_brand_path);
-  gpath_destroy(s_brand_centre);
-  gpath_destroy(s_brand_top);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawn brand");
 }
@@ -226,15 +252,6 @@ static void prv_window_load(Window *window) {
 
   s_time_font = fonts_load_custom_font(resource_get_handle(TIME_FONT));
   s_date_font = fonts_load_custom_font(resource_get_handle(DATE_FONT));
-
-/*
-  s_text_layer_hm = text_layer_create(grect_inset(GRect(0, 0, bounds.size.w, TIME_HEIGHT), (GEdgeInsets){ .top=0 }));
-  text_layer_set_text_alignment(s_text_layer_hm, GTextAlignmentCenter);
-  text_layer_set_background_color(s_text_layer_hm, GColorClear);
-  text_layer_set_text_color(s_text_layer_hm, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
-  text_layer_set_font(s_text_layer_hm, s_time_font);
-  layer_add_child(window_layer, text_layer_get_layer(s_text_layer_hm));
-*/
 
   s_text_layer_h = text_layer_create(grect_inset(GRect(0, centre.y-TIME_PADDING_TOP-(TIME_HEIGHT/4), bounds.size.w/2, TIME_HEIGHT), (GEdgeInsets){ .right=centre.x/3}));
   text_layer_set_text_alignment(s_text_layer_h, GTextAlignmentRight);
@@ -272,6 +289,11 @@ static void prv_window_load(Window *window) {
   layer_set_update_proc(s_canvas_layer, canvas_update_proc);
   layer_add_child(window_layer, s_canvas_layer);
 
+  // Battery
+  s_battery_layer = layer_create(bounds);
+  layer_set_update_proc(s_battery_layer, battery_update_proc);
+  layer_add_child(window_layer, s_battery_layer);
+
   prv_window_update();
 }
 
@@ -281,6 +303,7 @@ static void prv_window_unload(Window *window) {
   text_layer_destroy(s_text_layer_d);
   layer_destroy(s_canvas_layer);
   layer_destroy(s_bt_layer);
+  layer_destroy(s_battery_layer);
   fonts_unload_custom_font(s_time_font);
   fonts_unload_custom_font(s_date_font);
   if (s_window) { window_destroy(s_window); }

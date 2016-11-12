@@ -17,6 +17,9 @@ static void prv_init(void) {
   });
 
   accel_tap_service_subscribe(accel_tap_handler);
+
+  battery_state_service_subscribe(battery_callback);
+  battery_callback(battery_state_service_peek());
 }
 
 static void prv_deinit(void) {

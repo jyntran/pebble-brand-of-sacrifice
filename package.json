@@ -29,6 +29,8 @@
       "BrandColour",
       "TimeColour",
       "DateColour",
+      "BatteryColour",
+      "BatteryOutline",
       "BluetoothColour",
       "ShowDate",
       "BrandOnly"

@@ -7,6 +7,8 @@ static void prv_default_settings() {
   settings.BrandColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.TimeColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.DateColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
+  settings.BatteryColour = PBL_IF_COLOR_ELSE(GColorDarkCandyAppleRed, GColorBlack);
+  settings.BatteryOutline = false;
   settings.BluetoothColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.ShowDate = false;
   settings.BrandOnly = false;
@@ -35,6 +37,16 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *dt_colour_t = dict_find(iter, MESSAGE_KEY_DateColour);
   if (dt_colour_t) {
     settings.DateColour = GColorFromHEX(dt_colour_t->value->int32);
+  }
+
+  Tuple *by_colour_t = dict_find(iter, MESSAGE_KEY_BatteryColour);
+  if (by_colour_t) {
+    settings.BatteryColour = GColorFromHEX(by_colour_t->value->int32);
+  }
+
+  Tuple *bt_bool_t = dict_find(iter, MESSAGE_KEY_BatteryOutline);
+  if (bt_bool_t) {
+    settings.BatteryOutline = bt_bool_t->value->int32 == 1;
   }
 
   Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_BluetoothColour);

@@ -12,6 +12,7 @@
         "defaultValue": "0x000000",
         "label": "Background Colour",
         "description": "Change background colour",
+        "allowGray": true,
         "defaultValue": "0x000000"
       },
       {
@@ -34,6 +35,20 @@
         "label": "Date Colour",
         "description": "Change date colour",
         "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "color",
+        "messageKey": "BatteryColour",
+        "label": "Battery Colour",
+        "description": "Change battery level colour",
+        "defaultValue": "0xAA0000"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "BatteryOutline",
+        "label": "Show Battery Outline",
+        "description": "Stroke battery level",
+        "defaultValue": false
       },
       {
         "type": "color",
