@@ -38,6 +38,13 @@
     "resources": {
       "media": [
         {
+          "file": "images/brand-25.png",
+          "name": "IMAGE_BRAND_25",
+          "storageFormat": "png",
+          "type": "bitmap",
+          "menuIcon": true
+        },
+        {
           "characterRegex": "[:0-9/ ]",
           "type": "font",
           "name": "FONT_OLDEENGLISH_32",
