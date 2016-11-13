@@ -23,7 +23,7 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
     m = 1;
   }
 
-  int height = (s_battery_level * (73*m)) / 100;
+  int height = (s_battery_level * (78*m)) / 100;
 
   GPathInfo BATT_CENTRE_INFO = {
     .num_points = 2,
