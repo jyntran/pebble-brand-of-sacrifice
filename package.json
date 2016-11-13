@@ -18,8 +18,7 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite",
-      "emery"
+      "diorite"
     ],
     "watchapp": {
       "watchface": true
@@ -69,6 +68,18 @@
           "type": "font",
           "name": "FONT_BLACKFOREST_42",
           "file": "fonts/BlackForest.ttf"
+        },
+        {
+          "characterRegex": "[:0-9/ ]",
+          "type": "font",
+          "name": "FONT_NEWROCKER_32",
+          "file": "fonts/NewRocker.ttf"
+        },
+        {
+          "characterRegex": "[:0-9/ ]",
+          "type": "font",
+          "name": "FONT_NEWROCKER_42",
+          "file": "fonts/NewRocker.ttf"
         }
       ]
     }

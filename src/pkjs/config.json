@@ -11,7 +11,6 @@
         "messageKey": "BackgroundColour",
         "defaultValue": "0x000000",
         "label": "Background Colour",
-        "description": "Change background colour",
         "allowGray": true,
         "defaultValue": "0x000000"
       },
@@ -19,42 +18,36 @@
         "type": "color",
         "messageKey": "BrandColour",
         "label": "Brand Colour",
-        "description": "Change brand colour",
         "defaultValue": "0xFF0000"
       },
       {
         "type": "color",
         "messageKey": "TimeColour",
         "label": "Time Colour",
-        "description": "Change time colour",
         "defaultValue": "0xFF0000"
       },
       {
         "type": "color",
         "messageKey": "DateColour",
         "label": "Date Colour",
-        "description": "Change date colour",
         "defaultValue": "0xFF0000"
       },
       {
         "type": "color",
         "messageKey": "BatteryColour",
-        "label": "Battery Colour",
-        "description": "Change battery level colour",
+        "label": "Battery Bar Colour",
         "defaultValue": "0xAA0000"
       },
       {
         "type": "toggle",
         "messageKey": "BatteryOutline",
         "label": "Show Battery Outline",
-        "description": "Stroke battery level",
         "defaultValue": false
       },
       {
         "type": "color",
         "messageKey": "BluetoothColour",
         "label": "Bluetooth Colour",
-        "description": "Change Bluetooth icon colour",
         "defaultValue": "0xFF0000"
       },
       {
@@ -82,11 +75,11 @@
         "type": "select",
         "messageKey": "FontStyle",
         "label": "Font Style",
-        "description": "Select font style",
         "defaultValue": 1,
         "options": [
-          { "label": "Olde", "value": 1 },
-          { "label": "Neue", "value": 2 }
+          { "label": "Olde English", "value": 1 },
+          { "label": "Black Forest", "value": 2 },
+          { "label": "New Rocker", "value": 3 }
         ]
       }
     ]

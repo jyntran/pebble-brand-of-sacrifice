@@ -191,16 +191,16 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
     .num_points = 9,
     .points = (GPoint[9]) {
       // Left
-      {-25 * m, -24 *m},
+      {-20 * m, -24 *m},
       {0, 0},
-      {-25 * m, 20 * m},
+      {-20 * m, 20 * m},
       {0, 0},
       // Middle
       {0, 40 * m},
       // Right
-      {25 * m, 20 * m},
+      {20 * m, 20 * m},
       {0, 0},
-      {25 * m, -24 * m},
+      {20 * m, -24 * m},
       {14 * m, -36 * m},
     }
   };
@@ -279,38 +279,63 @@ static void prv_window_load(Window *window) {
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   window_set_background_color(s_window, settings.BackgroundColour);
 
-  uint32_t TIME_PADDING = settings.FontStyle == OLDE ? OLDE_TIME_PADDING : NEUE_TIME_PADDING;
-  //uint32_t DATE_PADDING = settings.FontStyle == OLDE ? OLDE_DATE_PADDING : NEUE_DATE_PADDING;
-  uint32_t DATE_OFFSET = settings.FontStyle == OLDE ? OLDE_DATE_OFFSET : NEUE_DATE_OFFSET;
+  uint32_t TIME_AREA,
+           TIME_HEIGHT,
+           DATE_HEIGHT,
+           TIME_PADDING,
+           DATE_OFFSET;
 
-  if (settings.FontStyle == OLDE) {
-    s_time_font = fonts_load_custom_font(resource_get_handle(OLDE_TIME_FONT));
-    s_date_font = fonts_load_custom_font(resource_get_handle(OLDE_DATE_FONT)); 
-  } else {
-    s_time_font = fonts_load_custom_font(resource_get_handle(NEUE_TIME_FONT));
-    s_date_font = fonts_load_custom_font(resource_get_handle(NEUE_DATE_FONT));
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "fontstyle: %d", settings.FontStyle);
+
+  switch (settings.FontStyle) {
+    case BF:
+      s_time_font = fonts_load_custom_font(resource_get_handle(BF_TIME_FONT));
+      s_date_font = fonts_load_custom_font(resource_get_handle(BF_DATE_FONT)); 
+      TIME_AREA = BF_TIME_AREA;
+      TIME_PADDING = BF_TIME_PADDING;
+      DATE_HEIGHT = BF_DATE_HEIGHT;
+      DATE_OFFSET = BF_DATE_OFFSET;
+      break;
+    case NR:
+      s_time_font = fonts_load_custom_font(resource_get_handle(NR_TIME_FONT));
+      s_date_font = fonts_load_custom_font(resource_get_handle(NR_DATE_FONT)); 
+      TIME_AREA = NR_TIME_AREA;
+      TIME_PADDING = NR_TIME_PADDING;
+      DATE_HEIGHT = NR_DATE_HEIGHT;
+      DATE_OFFSET = NR_DATE_OFFSET;
+      break;
+    case OE:
+    default:
+      s_time_font = fonts_load_custom_font(resource_get_handle(OE_TIME_FONT));
+      s_date_font = fonts_load_custom_font(resource_get_handle(OE_DATE_FONT)); 
+      TIME_AREA = OE_TIME_AREA;
+      TIME_PADDING = OE_TIME_PADDING;
+      DATE_HEIGHT = OE_DATE_HEIGHT;
+      DATE_OFFSET = OE_DATE_OFFSET;
   }
+  
+  TIME_HEIGHT = TIME_AREA - TIME_PADDING;
 
   GRect leftTime = grect_inset(
     GRect(
       0,
-      centre.y-(TIME_HEIGHT/4)-TIME_PADDING,
+      centre.y-(TIME_HEIGHT/2)-TIME_PADDING,
       bounds.size.w/2,
-      TIME_HEIGHT
+      TIME_AREA
     ),
     (GEdgeInsets){
-      .right=centre.x/3
+      .right=centre.x/4
   });
 
   GRect rightTime = grect_inset(
     GRect(
       centre.x,
-      centre.y-(TIME_HEIGHT/4)-TIME_PADDING,
+      centre.y-(TIME_HEIGHT/2)-TIME_PADDING,
       bounds.size.w/2,
-      TIME_HEIGHT
+      TIME_AREA
     ),
     (GEdgeInsets){
-      .left=centre.x/3
+      .left=centre.x/4
   });
 
   s_hour_layer = text_layer_create(leftTime);
@@ -411,7 +436,6 @@ static void prv_window_unload(Window *window) {
   layer_destroy(s_bt_layer);
   layer_destroy(s_battery_layer);
   layer_destroy(s_shift_layer);
-  layer_destroy(s_window_layer);
   fonts_unload_custom_font(s_time_font);
   fonts_unload_custom_font(s_date_font);
   if (s_window) { window_destroy(s_window); }
