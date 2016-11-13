@@ -3,9 +3,32 @@
 static Window *s_window;
 static TextLayer *s_hour_layer, *s_mins_layer, *s_day_layer, *s_mth_layer;
 static GFont s_time_font, s_date_font;
-static Layer *s_brand_layer, *s_bt_layer, *s_battery_layer;
+static Layer *s_window_layer, *s_shift_layer, *s_brand_layer, *s_bt_layer, *s_battery_layer;
 static AppTimer *timer;
 static int s_battery_level;
+static int16_t s_obstruction = 0;
+
+static void prv_resposition_layers() {
+  GRect full_bounds = layer_get_bounds(s_window_layer);
+  GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
+
+  s_obstruction = full_bounds.size.h - bounds.size.h;
+  if (s_obstruction != 0) {
+    s_obstruction = s_obstruction - 24;
+  }
+
+  GRect frame = layer_get_frame(s_shift_layer);
+  frame.origin.y = bounds.origin.y - s_obstruction;
+  layer_set_frame(s_shift_layer, frame);
+}
+
+static void prv_unobstructed_change(AnimationProgress progress, void *context) {
+  prv_resposition_layers();
+}
+
+static void prv_unobstructed_did_change(void *context) {
+  prv_resposition_layers();
+}
 
 void battery_callback(BatteryChargeState state) {
   s_battery_level = state.charge_percent;
@@ -153,7 +176,6 @@ void bluetooth_callback(bool connected) {
   }
 }
 
-
 static void bt_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
@@ -247,8 +269,13 @@ static void brand_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void prv_window_load(Window *window) {
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
+  s_window_layer = window_get_root_layer(window);
+  GRect full_bounds = layer_get_bounds(s_window_layer);
+  GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
+
+  s_shift_layer = layer_create(full_bounds);
+  layer_add_child(s_window_layer, s_shift_layer);
+
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   window_set_background_color(s_window, settings.BackgroundColour);
 
@@ -291,14 +318,14 @@ static void prv_window_load(Window *window) {
   text_layer_set_background_color(s_hour_layer, GColorClear);
   text_layer_set_text_color(s_hour_layer, settings.TimeColour);
   text_layer_set_font(s_hour_layer, s_time_font);
-  layer_add_child(window_layer, text_layer_get_layer(s_hour_layer));
+  layer_add_child(s_shift_layer, text_layer_get_layer(s_hour_layer));
 
   s_mins_layer = text_layer_create(rightTime);
   text_layer_set_text_alignment(s_mins_layer, GTextAlignmentCenter);
   text_layer_set_background_color(s_mins_layer, GColorClear);
   text_layer_set_text_color(s_mins_layer, settings.TimeColour);
   text_layer_set_font(s_mins_layer, s_time_font);
-  layer_add_child(window_layer, text_layer_get_layer(s_mins_layer));
+  layer_add_child(s_shift_layer, text_layer_get_layer(s_mins_layer));
 
   if (settings.ShowDate) {
     GRect leftDate = grect_inset(
@@ -337,19 +364,19 @@ static void prv_window_load(Window *window) {
     text_layer_set_background_color(s_day_layer, GColorClear);
     text_layer_set_text_color(s_day_layer, settings.DateColour);
     text_layer_set_font(s_day_layer, s_date_font);
-    layer_add_child(window_layer, text_layer_get_layer(s_day_layer));
+    layer_add_child(s_shift_layer, text_layer_get_layer(s_day_layer));
 
     text_layer_set_text_alignment(s_mth_layer, GTextAlignmentCenter);
     text_layer_set_background_color(s_mth_layer, GColorClear);
     text_layer_set_text_color(s_mth_layer, settings.DateColour);
     text_layer_set_font(s_mth_layer, s_date_font);
-    layer_add_child(window_layer, text_layer_get_layer(s_mth_layer));
+    layer_add_child(s_shift_layer, text_layer_get_layer(s_mth_layer));
   }
 
   // Bluetooth
   s_bt_layer = layer_create(bounds);
   layer_set_update_proc(s_bt_layer, bt_update_proc);
-  layer_add_child(window_layer, s_bt_layer);
+  layer_add_child(s_shift_layer, s_bt_layer);
   layer_set_hidden(s_bt_layer, true);
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());
@@ -357,12 +384,20 @@ static void prv_window_load(Window *window) {
   // Brand layer
   s_brand_layer = layer_create(bounds);
   layer_set_update_proc(s_brand_layer, brand_update_proc);
-  layer_add_child(window_layer, s_brand_layer);
+  layer_add_child(s_shift_layer, s_brand_layer);
 
   // Battery
   s_battery_layer = layer_create(bounds);
   layer_set_update_proc(s_battery_layer, battery_update_proc);
-  layer_add_child(window_layer, s_battery_layer);
+  layer_add_child(s_shift_layer, s_battery_layer);
+
+  UnobstructedAreaHandlers handlers = {
+    .change = prv_unobstructed_change,
+    .did_change = prv_unobstructed_did_change
+  };
+  unobstructed_area_service_subscribe(handlers, NULL);
+
+  prv_resposition_layers();
 
   prv_window_update();
 }
@@ -375,6 +410,8 @@ static void prv_window_unload(Window *window) {
   layer_destroy(s_brand_layer);
   layer_destroy(s_bt_layer);
   layer_destroy(s_battery_layer);
+  layer_destroy(s_shift_layer);
+  layer_destroy(s_window_layer);
   fonts_unload_custom_font(s_time_font);
   fonts_unload_custom_font(s_date_font);
   if (s_window) { window_destroy(s_window); }
