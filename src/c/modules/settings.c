@@ -12,7 +12,7 @@ static void prv_default_settings() {
   settings.BluetoothColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.ShowDate = false;
   settings.DayMonthFormat = false;
-  settings.BrandOnly = false;
+  settings.LargeBrand = false;
   settings.FontStyle = 1;
 }
 
@@ -66,9 +66,9 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     settings.DayMonthFormat = dm_bool_t->value->int32 == 1;
   }
 
-  Tuple *bo_bool_t = dict_find(iter, MESSAGE_KEY_BrandOnly);
-  if (bo_bool_t) {
-    settings.BrandOnly = bo_bool_t->value->int32 == 1;
+  Tuple *lg_bool_t = dict_find(iter, MESSAGE_KEY_LargeBrand);
+  if (lg_bool_t) {
+    settings.LargeBrand = lg_bool_t->value->int32 == 1;
   }
 
   Tuple *fs_val_t = dict_find(iter, MESSAGE_KEY_FontStyle);

@@ -4,7 +4,7 @@
 #include "../modules/settings.h"
 
 #define BRAND_STROKE_WIDTH 3
-#define BRAND_STROKE_WIDTH_LG 5
+#define BRAND_STROKE_WIDTH_LG 3
 
 #define OLDE 1
 #define NEUE 2

@@ -73,9 +73,9 @@
       },
       {
         "type": "toggle",
-        "messageKey": "BrandOnly",
-        "label": "Brand Only",
-        "description": "Show only the brand",
+        "messageKey": "LargeBrand",
+        "label": "Large Brand",
+        "description": "Show larger brand",
         "defaultValue": false
       },
       {
