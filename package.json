@@ -24,17 +24,13 @@
       "watchface": true
     },
     "messageKeys": [
+      "FontStyle",
       "BackgroundColour",
       "BrandColour",
       "TimeColour",
-      "DateColour",
       "BatteryColour",
       "BatteryOutline",
-      "BluetoothColour",
-      "ShowDate",
-      "DayMonthFormat",
-      "LargeBrand",
-      "FontStyle"
+      "BluetoothColour"
     ],
     "resources": {
       "media": [
@@ -48,32 +44,14 @@
         {
           "characterRegex": "[:0-9/ ]",
           "type": "font",
-          "name": "FONT_OLDEENGLISH_32",
-          "file": "fonts/OldeEnglish.ttf"
-        },
-        {
-          "characterRegex": "[:0-9/ ]",
-          "type": "font",
           "name": "FONT_OLDEENGLISH_48",
           "file": "fonts/OldeEnglish.ttf"
         },
         {
           "characterRegex": "[:0-9/ ]",
           "type": "font",
-          "name": "FONT_BLACKFOREST_28",
-          "file": "fonts/BlackForest.ttf"
-        },
-        {
-          "characterRegex": "[:0-9/ ]",
-          "type": "font",
           "name": "FONT_BLACKFOREST_42",
           "file": "fonts/BlackForest.ttf"
-        },
-        {
-          "characterRegex": "[:0-9/ ]",
-          "type": "font",
-          "name": "FONT_NEWROCKER_32",
-          "file": "fonts/NewRocker.ttf"
         },
         {
           "characterRegex": "[:0-9/ ]",

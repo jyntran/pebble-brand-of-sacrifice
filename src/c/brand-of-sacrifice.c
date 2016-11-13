@@ -7,24 +7,21 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 static void prv_init(void) {
   prv_load_settings();
-
   prv_window_push();
 
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-
+  battery_state_service_subscribe(battery_callback);
+  battery_callback(battery_state_service_peek());
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = bluetooth_callback
   });
 
-  accel_tap_service_subscribe(accel_tap_handler);
-
-  battery_state_service_subscribe(battery_callback);
-  battery_callback(battery_state_service_peek());
 }
 
 static void prv_deinit(void) {
   tick_timer_service_unsubscribe();
-  accel_tap_service_unsubscribe();
+  battery_state_service_unsubscribe();
+  connection_service_unsubscribe();
 }
 
 int main(void) {

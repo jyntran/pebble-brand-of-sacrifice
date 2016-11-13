@@ -1,19 +1,13 @@
 #include "settings.h"
 
-//struct ClaySettings settings;
-
 static void prv_default_settings() {
+  settings.FontStyle = 1;
   settings.BackgroundColour = GColorBlack;
   settings.BrandColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
   settings.TimeColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
-  settings.DateColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
-  settings.BatteryColour = PBL_IF_COLOR_ELSE(GColorDarkCandyAppleRed, GColorBlack);
-  settings.BatteryOutline = false;
+  settings.BatteryColour = PBL_IF_COLOR_ELSE(GColorBulgarianRose, GColorBlack);
+  settings.BatteryOutline = true;
   settings.BluetoothColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
-  settings.ShowDate = false;
-  settings.DayMonthFormat = false;
-  settings.LargeBrand = false;
-  settings.FontStyle = 1;
 }
 
 static void prv_save_settings() {
@@ -21,6 +15,11 @@ static void prv_save_settings() {
 }
 
 static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+  Tuple *fs_val_t = dict_find(iter, MESSAGE_KEY_FontStyle);
+  if (fs_val_t) {
+    settings.FontStyle = fs_val_t->value->int32;
+  }
+
   Tuple *bg_colour_t = dict_find(iter, MESSAGE_KEY_BackgroundColour);
   if (bg_colour_t) {
     settings.BackgroundColour = GColorFromHEX(bg_colour_t->value->int32);
@@ -36,11 +35,6 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     settings.TimeColour = GColorFromHEX(tm_colour_t->value->int32);
   }
 
-  Tuple *dt_colour_t = dict_find(iter, MESSAGE_KEY_DateColour);
-  if (dt_colour_t) {
-    settings.DateColour = GColorFromHEX(dt_colour_t->value->int32);
-  }
-
   Tuple *by_colour_t = dict_find(iter, MESSAGE_KEY_BatteryColour);
   if (by_colour_t) {
     settings.BatteryColour = GColorFromHEX(by_colour_t->value->int32);
@@ -54,26 +48,6 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_BluetoothColour);
   if (bt_colour_t) {
     settings.BluetoothColour = GColorFromHEX(bt_colour_t->value->int32);
-  }
-
-  Tuple *dt_bool_t = dict_find(iter, MESSAGE_KEY_ShowDate);
-  if (dt_bool_t) {
-    settings.ShowDate = dt_bool_t->value->int32 == 1;
-  }
-
-  Tuple *dm_bool_t = dict_find(iter, MESSAGE_KEY_DayMonthFormat);
-  if (dm_bool_t) {
-    settings.DayMonthFormat = dm_bool_t->value->int32 == 1;
-  }
-
-  Tuple *lg_bool_t = dict_find(iter, MESSAGE_KEY_LargeBrand);
-  if (lg_bool_t) {
-    settings.LargeBrand = lg_bool_t->value->int32 == 1;
-  }
-
-  Tuple *fs_val_t = dict_find(iter, MESSAGE_KEY_FontStyle);
-  if (fs_val_t) {
-    settings.FontStyle = fs_val_t->value->int32;
   }
 
   prv_save_settings();

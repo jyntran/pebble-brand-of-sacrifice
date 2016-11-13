@@ -1,10 +1,9 @@
 #include "main_window.h"
 
 static Window *s_window;
-static TextLayer *s_hour_layer, *s_mins_layer, *s_day_layer, *s_mth_layer;
-static GFont s_time_font, s_date_font;
+static TextLayer *s_hour_layer, *s_mins_layer;
+static GFont s_time_font;
 static Layer *s_window_layer, *s_shift_layer, *s_brand_layer, *s_bt_layer, *s_battery_layer;
-static AppTimer *timer;
 static int s_battery_level;
 static int16_t s_obstruction = 0;
 
@@ -39,32 +38,25 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
-  uint32_t m; // multiplier
-  if (settings.LargeBrand) {
-    m = 2;
-  } else {
-    m = 1;
-  }
-
-  int height = (s_battery_level * (78*m)) / 100;
+  int height = (s_battery_level * 78) / 100;
 
   GPathInfo BATT_CENTRE_INFO = {
     .num_points = 2,
     .points = (GPoint[2]) {
-      {0, 38 * m},
-      {0, -36 * m}
+      {0, 38},
+      {0, -36}
     }
   };
 
   GPathInfo BATT_BAR_INFO = {
     .num_points = 6,
     .points = (GPoint[6]) {
-      {-1, 38 * m},
-      {0, 39 * m},
-      {1, 38 * m},
-      {1, (39 * m)-height},
-      {0, (38 * m)-height},
-      {-1, (39 * m)-height}
+      {-1, 38},
+      {0, 39},
+      {1, 38},
+      {1, 39-height},
+      {0, 38-height},
+      {-1, 39-height}
     }
   };
 
@@ -87,18 +79,11 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
 
   gpath_move_to(s_batt_centre, centre);
   gpath_move_to(s_batt_bar, centre);
-  if (settings.LargeBrand) {
-    gpath_move_to(s_batt_top, (GPoint){centre.x, centre.y/2+2});
-  } else {
-    gpath_move_to(s_batt_top, centre);
-  }
+  gpath_move_to(s_batt_top, centre);
 
   // Draw background
-  if (settings.LargeBrand) {
-    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH_LG);
-  } else {
-    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
-  }
+  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
+ 
   graphics_context_set_stroke_color(ctx, settings.BrandColour);
   graphics_context_set_fill_color(ctx, settings.BrandColour);
   gpath_draw_outline(ctx, s_batt_centre);
@@ -125,16 +110,6 @@ static void battery_update_proc(Layer *layer, GContext *ctx) {
   gpath_destroy(s_batt_top);
 }
 
-static void timer_callback(void *data) {
-  //  layer_remove_from_parent((Layer *)s_text_layer_d);
-}
-
-void accel_tap_handler(AccelAxisType axis, int32_t direction) {
-  //layer_insert_above_sibling((Layer *)s_text_layer_d, (Layer *)s_canvas_layer);
-  timer = app_timer_register(3000, (AppTimerCallback)timer_callback, NULL);
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Tap");
-}
-
 static void update_time() {
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
@@ -147,16 +122,6 @@ static void update_time() {
 
   text_layer_set_text(s_hour_layer, s_buffer_hour);
   text_layer_set_text(s_mins_layer, s_buffer_mins);
-
-  if (settings.ShowDate) {
-    static char s_buffer_day[4];
-    strftime(s_buffer_day, sizeof(s_buffer_day), "%d", tick_time);
-    static char s_buffer_mth[4];
-    strftime(s_buffer_mth, sizeof(s_buffer_mth), "%m", tick_time);
-
-    text_layer_set_text(s_day_layer, s_buffer_day);
-    text_layer_set_text(s_mth_layer, s_buffer_mth);
-  }
 }
 
 void prv_window_update() {
@@ -180,28 +145,21 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
-  uint32_t m; // multiplier
-  if (settings.LargeBrand) {
-    m = 2;
-  } else {
-    m = 1;
-  }
-
   GPathInfo BT_PATH_INFO = {
     .num_points = 9,
     .points = (GPoint[9]) {
       // Left
-      {-20 * m, -24 *m},
+      {-20, -24},
       {0, 0},
-      {-20 * m, 20 * m},
+      {-20, 20},
       {0, 0},
       // Middle
-      {0, 40 * m},
+      {0, 40},
       // Right
-      {20 * m, 20 * m},
+      {20, 20},
       {0, 0},
-      {20 * m, -24 * m},
-      {14 * m, -36 * m},
+      {20, -24},
+      {14, -36},
     }
   };
 
@@ -211,11 +169,7 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
  
   graphics_context_set_stroke_color(ctx, settings.BluetoothColour);
   graphics_context_set_fill_color(ctx, settings.BluetoothColour);
-  if (settings.LargeBrand) {
-    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH_LG);
-  } else {
-    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
-  }
+  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
  
   gpath_draw_outline_open(ctx, s_bt_path);
  
@@ -226,28 +180,21 @@ static void brand_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
-  uint32_t m; // multiplier
-  if (settings.LargeBrand) {
-    m = 2;
-  } else {
-    m = 1;
-  }
-
   GPathInfo BRAND_PATH_INFO = {
     .num_points = 9,
     .points = (GPoint[9]) {
       // Left
-      {-14 * m, -36 * m},
-      {-20 * m, -24 *m},
+      {-14, -36},
+      {-20, -24},
       {0, 0},
-      {-20 * m, 20 * m},
+      {-20, 20},
       // Middle
-      {0, 40 * m},
+      {0, 40},
       // Right
-      {20 * m, 20 * m},
+      {20, 20},
       {0, 0},
-      {20 * m, -24 * m},
-      {14 * m, -36 * m}
+      {20, -24},
+      {14, -36}
     }
   };
 
@@ -257,11 +204,7 @@ static void brand_update_proc(Layer *layer, GContext *ctx) {
 
   graphics_context_set_stroke_color(ctx, settings.BrandColour);
   graphics_context_set_fill_color(ctx, settings.BrandColour);
-  if (settings.LargeBrand) {
-    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH_LG);
-  } else {
-    graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
-  }
+  graphics_context_set_stroke_width(ctx, BRAND_STROKE_WIDTH);
  
   gpath_draw_outline_open(ctx, s_brand_path);
 
@@ -285,33 +228,22 @@ static void prv_window_load(Window *window) {
            TIME_PADDING,
            DATE_OFFSET;
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "fontstyle: %d", settings.FontStyle);
-
   switch (settings.FontStyle) {
-    case BF:
-      s_time_font = fonts_load_custom_font(resource_get_handle(BF_TIME_FONT));
-      s_date_font = fonts_load_custom_font(resource_get_handle(BF_DATE_FONT)); 
-      TIME_AREA = BF_TIME_AREA;
-      TIME_PADDING = BF_TIME_PADDING;
-      DATE_HEIGHT = BF_DATE_HEIGHT;
-      DATE_OFFSET = BF_DATE_OFFSET;
-      break;
-    case NR:
-      s_time_font = fonts_load_custom_font(resource_get_handle(NR_TIME_FONT));
-      s_date_font = fonts_load_custom_font(resource_get_handle(NR_DATE_FONT)); 
-      TIME_AREA = NR_TIME_AREA;
-      TIME_PADDING = NR_TIME_PADDING;
-      DATE_HEIGHT = NR_DATE_HEIGHT;
-      DATE_OFFSET = NR_DATE_OFFSET;
-      break;
     case OE:
-    default:
       s_time_font = fonts_load_custom_font(resource_get_handle(OE_TIME_FONT));
-      s_date_font = fonts_load_custom_font(resource_get_handle(OE_DATE_FONT)); 
       TIME_AREA = OE_TIME_AREA;
       TIME_PADDING = OE_TIME_PADDING;
-      DATE_HEIGHT = OE_DATE_HEIGHT;
-      DATE_OFFSET = OE_DATE_OFFSET;
+      break;
+    case BF:
+      s_time_font = fonts_load_custom_font(resource_get_handle(BF_TIME_FONT));
+      TIME_AREA = BF_TIME_AREA;
+      TIME_PADDING = BF_TIME_PADDING;
+      break;
+    case NR:
+    default:
+      s_time_font = fonts_load_custom_font(resource_get_handle(NR_TIME_FONT));
+      TIME_AREA = NR_TIME_AREA;
+      TIME_PADDING = NR_TIME_PADDING;
   }
   
   TIME_HEIGHT = TIME_AREA - TIME_PADDING;
@@ -352,52 +284,6 @@ static void prv_window_load(Window *window) {
   text_layer_set_font(s_mins_layer, s_time_font);
   layer_add_child(s_shift_layer, text_layer_get_layer(s_mins_layer));
 
-  if (settings.ShowDate) {
-    GRect leftDate = grect_inset(
-      GRect(
-        centre.x/2,
-        settings.LargeBrand ? centre.y+(DATE_HEIGHT/2)+DATE_OFFSET : 0,
-        bounds.size.w/4,
-        DATE_HEIGHT
-      ),
-      (GEdgeInsets){
-        .left=4,
-        .right=2
-    });
-
-    GRect rightDate = grect_inset(
-      GRect(
-        centre.x,
-        settings.LargeBrand ? centre.y+(DATE_HEIGHT/2)+DATE_OFFSET : 0,
-        bounds.size.w/4,
-        DATE_HEIGHT
-      ),
-      (GEdgeInsets){
-        .left=2,
-        .right=4
-    });
-
-    if (settings.DayMonthFormat) {
-      s_day_layer = text_layer_create(leftDate);
-      s_mth_layer = text_layer_create(rightDate);
-    } else {
-      s_mth_layer = text_layer_create(leftDate);
-      s_day_layer = text_layer_create(rightDate);
-    }
-
-    text_layer_set_text_alignment(s_day_layer, GTextAlignmentCenter);
-    text_layer_set_background_color(s_day_layer, GColorClear);
-    text_layer_set_text_color(s_day_layer, settings.DateColour);
-    text_layer_set_font(s_day_layer, s_date_font);
-    layer_add_child(s_shift_layer, text_layer_get_layer(s_day_layer));
-
-    text_layer_set_text_alignment(s_mth_layer, GTextAlignmentCenter);
-    text_layer_set_background_color(s_mth_layer, GColorClear);
-    text_layer_set_text_color(s_mth_layer, settings.DateColour);
-    text_layer_set_font(s_mth_layer, s_date_font);
-    layer_add_child(s_shift_layer, text_layer_get_layer(s_mth_layer));
-  }
-
   // Bluetooth
   s_bt_layer = layer_create(bounds);
   layer_set_update_proc(s_bt_layer, bt_update_proc);
@@ -430,14 +316,11 @@ static void prv_window_load(Window *window) {
 static void prv_window_unload(Window *window) {
   text_layer_destroy(s_hour_layer);
   text_layer_destroy(s_mins_layer);
-  text_layer_destroy(s_day_layer);
-  text_layer_destroy(s_mth_layer);
   layer_destroy(s_brand_layer);
   layer_destroy(s_bt_layer);
   layer_destroy(s_battery_layer);
   layer_destroy(s_shift_layer);
   fonts_unload_custom_font(s_time_font);
-  fonts_unload_custom_font(s_date_font);
   if (s_window) { window_destroy(s_window); }
 }
 

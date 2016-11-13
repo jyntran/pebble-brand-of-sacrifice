@@ -1,11 +1,22 @@
 [
   {
     "type": "heading",
-    "defaultValue": "Brand of Sacrifice Watchface"
+    "defaultValue": "Brand of Sacrifice"
   },
   {
     "type": "section",
     "items": [
+      {
+        "type": "select",
+        "messageKey": "FontStyle",
+        "label": "Font",
+        "defaultValue": 1,
+        "options": [
+          { "label": "New Rocker", "value": 1 },
+          { "label": "Olde English", "value": 2 },
+          { "label": "Black Forest", "value": 3 }
+        ]
+      },
       {
         "type": "color",
         "messageKey": "BackgroundColour",
@@ -28,59 +39,21 @@
       },
       {
         "type": "color",
-        "messageKey": "DateColour",
-        "label": "Date Colour",
-        "defaultValue": "0xFF0000"
-      },
-      {
-        "type": "color",
         "messageKey": "BatteryColour",
         "label": "Battery Bar Colour",
-        "defaultValue": "0xAA0000"
+        "defaultValue": "0x550000"
       },
       {
         "type": "toggle",
         "messageKey": "BatteryOutline",
         "label": "Show Battery Outline",
-        "defaultValue": false
+        "defaultValue": true
       },
       {
         "type": "color",
         "messageKey": "BluetoothColour",
         "label": "Bluetooth Colour",
         "defaultValue": "0xFF0000"
-      },
-      {
-        "type": "toggle",
-        "messageKey": "ShowDate",
-        "label": "Show Date",
-        "description": "Show date below brand",
-        "defaultValue": false
-      },
-      {
-        "type": "toggle",
-        "messageKey": "DayMonthFormat",
-        "label": "Use Day/Month Format",
-        "description": "Display date as Day/Month",
-        "defaultValue": false
-      },
-      {
-        "type": "toggle",
-        "messageKey": "LargeBrand",
-        "label": "Large Brand",
-        "description": "Show larger brand",
-        "defaultValue": false
-      },
-      {
-        "type": "select",
-        "messageKey": "FontStyle",
-        "label": "Font Style",
-        "defaultValue": 1,
-        "options": [
-          { "label": "Olde English", "value": 1 },
-          { "label": "Black Forest", "value": 2 },
-          { "label": "New Rocker", "value": 3 }
-        ]
       }
     ]
   },
