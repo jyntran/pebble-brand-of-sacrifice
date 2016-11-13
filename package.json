@@ -29,7 +29,8 @@
       "TimeColour",
       "BatteryColour",
       "BatteryOutline",
-      "BluetoothColour"
+      "BluetoothColour",
+      "BluetoothVibration"
     ],
     "resources": {
       "media": [

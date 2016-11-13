@@ -54,6 +54,12 @@
         "messageKey": "BluetoothColour",
         "label": "Bluetooth Colour",
         "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "BluetoothVibration",
+        "label": "Enable Bluetooth Vibration",
+        "defaultValue": true
       }
     ]
   },

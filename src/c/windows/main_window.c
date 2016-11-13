@@ -136,7 +136,7 @@ void bluetooth_callback(bool connected) {
     layer_set_hidden(s_brand_layer, !connected);
   }
 
-  if (!connected) {
+  if (settings.BluetoothVibration && !connected) {
     vibes_double_pulse();
   }
 }

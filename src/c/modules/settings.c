@@ -8,6 +8,7 @@ static void prv_default_settings() {
   settings.BatteryColour = PBL_IF_COLOR_ELSE(GColorBulgarianRose, GColorBlack);
   settings.BatteryOutline = true;
   settings.BluetoothColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
+  settings.BluetoothVibration = true;
 }
 
 static void prv_save_settings() {
@@ -48,6 +49,11 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_BluetoothColour);
   if (bt_colour_t) {
     settings.BluetoothColour = GColorFromHEX(bt_colour_t->value->int32);
+  }
+
+  Tuple *bv_bool_t = dict_find(iter, MESSAGE_KEY_BluetoothVibration);
+  if (bv_bool_t) {
+    settings.BluetoothVibration = bv_bool_t->value->int32 == 1;
   }
 
   prv_save_settings();

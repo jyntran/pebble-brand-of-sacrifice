@@ -11,6 +11,7 @@ typedef struct ClaySettings {
   GColor BatteryColour;
   bool BatteryOutline;
   GColor BluetoothColour;
+  bool BluetoothVibration;
 } ClaySettings;
 
 struct ClaySettings settings;
