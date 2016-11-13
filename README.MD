@@ -1,5 +1,9 @@
 # Brand of Sacrifice
 
+![Aplite](https://github.com/jyntran/pebble-brand-of-sacrifice/blob/master/screenshots/aplite.png)
+![Basalt](https://github.com/jyntran/pebble-brand-of-sacrifice/blob/master/screenshots/basalt2.png)
+![Diorite](https://github.com/jyntran/pebble-brand-of-sacrifice/blob/master/screenshots/dioriteb.png)
+
 Simple digital watchface inspired by Berserk (ベルセルク).
 
 Features:
