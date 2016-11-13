@@ -1,0 +1,72 @@
+[
+  {
+    "type": "heading",
+    "defaultValue": "Brand of Sacrifice"
+  },
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "select",
+        "messageKey": "FontStyle",
+        "label": "Font",
+        "defaultValue": 1,
+        "options": [
+          { "label": "New Rocker", "value": 1 },
+          { "label": "Olde English", "value": 2 },
+          { "label": "Black Forest", "value": 3 }
+        ]
+      },
+      {
+        "type": "color",
+        "messageKey": "BackgroundColour",
+        "defaultValue": "0x000000",
+        "label": "Background Colour",
+        "allowGray": true,
+        "defaultValue": "0x000000"
+      },
+      {
+        "type": "color",
+        "messageKey": "BrandColour",
+        "label": "Brand Colour",
+        "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "color",
+        "messageKey": "TimeColour",
+        "label": "Time Colour",
+        "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "color",
+        "messageKey": "BatteryColour",
+        "label": "Battery Bar Colour",
+        "defaultValue": "0x550000"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "BatteryOutline",
+        "label": "Show Battery Outline",
+        "defaultValue": true
+      },
+      {
+        "type": "color",
+        "messageKey": "BluetoothColour",
+        "label": "Bluetooth Colour",
+        "defaultValue": "0xFF0000"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "BluetoothVibration",
+        "label": "Enable Bluetooth Vibration",
+        "defaultValue": true
+      }
+    ]
+  },
+  {
+    "type": "submit",
+    "defaultValue": "Save Settings"
+  }
+]
+
+
