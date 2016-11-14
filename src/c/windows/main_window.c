@@ -7,27 +7,6 @@ static Layer *s_window_layer, *s_shift_layer, *s_brand_layer, *s_bt_layer, *s_ba
 static int s_battery_level;
 static int16_t s_obstruction = 0;
 
-static void prv_resposition_layers() {
-  GRect full_bounds = layer_get_bounds(s_window_layer);
-  GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
-
-  s_obstruction = full_bounds.size.h - bounds.size.h;
-  if (s_obstruction != 0) {
-    s_obstruction = s_obstruction - 24;
-  }
-
-  GRect frame = layer_get_frame(s_shift_layer);
-  frame.origin.y = bounds.origin.y - s_obstruction;
-  layer_set_frame(s_shift_layer, frame);
-}
-
-static void prv_unobstructed_change(AnimationProgress progress, void *context) {
-  prv_resposition_layers();
-}
-
-static void prv_unobstructed_did_change(void *context) {
-  prv_resposition_layers();
-}
 
 void battery_callback(BatteryChargeState state) {
   s_battery_level = state.charge_percent;
@@ -35,7 +14,7 @@ void battery_callback(BatteryChargeState state) {
 }
 
 static void battery_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
+  GRect bounds = layer_get_unobstructed_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
   int height = (s_battery_level * 78) / 100;
@@ -124,6 +103,18 @@ static void update_time() {
   text_layer_set_text(s_mins_layer, s_buffer_mins);
 }
 
+static void prv_unobstructed_will_change (GRect final_unobstructed_screen_area, void *context) {
+
+}
+
+static void prv_unobstructed_did_change (void *context) {
+
+}
+
+static void prv_unobstructed_change(AnimationProgress progress, void *context) {
+
+}
+
 void prv_window_update() {
   update_time();
   layer_mark_dirty(s_brand_layer);
@@ -142,7 +133,7 @@ void bluetooth_callback(bool connected) {
 }
 
 static void bt_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
+  GRect bounds = layer_get_unobstructed_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
   GPathInfo BT_PATH_INFO = {
@@ -177,7 +168,7 @@ static void bt_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void brand_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
+  GRect bounds = layer_get_unobstructed_bounds(layer);
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
   GPathInfo BRAND_PATH_INFO = {
@@ -216,7 +207,7 @@ static void prv_window_load(Window *window) {
   GRect full_bounds = layer_get_bounds(s_window_layer);
   GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
 
-  s_shift_layer = layer_create(full_bounds);
+  s_shift_layer = layer_create(bounds);
   layer_add_child(s_window_layer, s_shift_layer);
 
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
@@ -287,7 +278,7 @@ static void prv_window_load(Window *window) {
   // Bluetooth
   s_bt_layer = layer_create(bounds);
   layer_set_update_proc(s_bt_layer, bt_update_proc);
-  layer_add_child(s_shift_layer, s_bt_layer);
+  layer_add_child(s_window_layer, s_bt_layer);
   layer_set_hidden(s_bt_layer, true);
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());
@@ -295,20 +286,19 @@ static void prv_window_load(Window *window) {
   // Brand layer
   s_brand_layer = layer_create(bounds);
   layer_set_update_proc(s_brand_layer, brand_update_proc);
-  layer_add_child(s_shift_layer, s_brand_layer);
+  layer_add_child(s_window_layer, s_brand_layer);
 
   // Battery
   s_battery_layer = layer_create(bounds);
   layer_set_update_proc(s_battery_layer, battery_update_proc);
-  layer_add_child(s_shift_layer, s_battery_layer);
+  layer_add_child(s_window_layer, s_battery_layer);
 
   UnobstructedAreaHandlers handlers = {
+    .will_change = prv_unobstructed_will_change,
     .change = prv_unobstructed_change,
     .did_change = prv_unobstructed_did_change
   };
   unobstructed_area_service_subscribe(handlers, NULL);
-
-  prv_resposition_layers();
 
   prv_window_update();
 }
