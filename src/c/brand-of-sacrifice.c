@@ -5,7 +5,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   prv_window_update();
 }
 
-static void prv_unobstructed_did_change (void *context) {
+static void prv_unobstructed_change(AnimationProgress progress, void *context) {
   prv_window_update();
 }
 
@@ -23,7 +23,7 @@ static void prv_init(void) {
   });
 
   UnobstructedAreaHandlers handlers = {
-    .did_change = prv_unobstructed_did_change
+    .change = prv_unobstructed_change
   };
   unobstructed_area_service_subscribe(handlers, NULL);
 }
