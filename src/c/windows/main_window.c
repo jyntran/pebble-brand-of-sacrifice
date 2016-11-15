@@ -1,11 +1,20 @@
 #include "main_window.h"
 
 static Window *s_window;
-static TextLayer *s_hour_layer, *s_mins_layer;
+static TextLayer *s_hour_layer,
+                 *s_mins_layer;
+static Layer *s_window_layer,
+             *s_time_layer,
+             *s_brand_layer,
+             *s_bt_layer,
+             *s_battery_layer;
 static GFont s_time_font;
-static Layer *s_window_layer, *s_shift_layer, *s_brand_layer, *s_bt_layer, *s_battery_layer;
+
 static int s_battery_level;
-static int16_t s_obstruction = 0;
+
+uint32_t TIME_AREA,
+         TIME_HEIGHT,
+         TIME_PADDING;
 
 
 void battery_callback(BatteryChargeState state) {
@@ -103,22 +112,49 @@ static void update_time() {
   text_layer_set_text(s_mins_layer, s_buffer_mins);
 }
 
-static void prv_unobstructed_will_change (GRect final_unobstructed_screen_area, void *context) {
+static void time_layout(GRect bounds) {
+  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
 
-}
+  GRect leftTime = grect_inset(
+    GRect(
+      0,
+      centre.y-(TIME_HEIGHT/2)-TIME_PADDING,
+      bounds.size.w/2,
+      TIME_AREA
+    ),
+    (GEdgeInsets){
+      .right=centre.x/4
+  });
 
-static void prv_unobstructed_did_change (void *context) {
+  GRect rightTime = grect_inset(
+    GRect(
+      centre.x,
+      centre.y-(TIME_HEIGHT/2)-TIME_PADDING,
+      bounds.size.w/2,
+      TIME_AREA
+    ),
+    (GEdgeInsets){
+      .left=centre.x/4
+  });
 
-}
+  layer_set_frame(text_layer_get_layer(s_hour_layer), leftTime);
+  layer_set_frame(text_layer_get_layer(s_mins_layer), rightTime);
 
-static void prv_unobstructed_change(AnimationProgress progress, void *context) {
+  layer_set_frame(s_time_layer, bounds);
 
+  update_time();
 }
 
 void prv_window_update() {
-  update_time();
-  layer_mark_dirty(s_brand_layer);
-  layer_mark_dirty(s_bt_layer);
+  GRect bounds = layer_get_bounds(s_window_layer);
+  GRect unobstructed_bounds = layer_get_unobstructed_bounds(s_window_layer);
+  int16_t obstruction_height = bounds.size.h - unobstructed_bounds.size.h;
+
+  if (obstruction_height == 0) {
+    time_layout(bounds);
+  } else {
+    time_layout(unobstructed_bounds);
+  }
 }
 
 void bluetooth_callback(bool connected) {
@@ -203,21 +239,14 @@ static void brand_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void prv_window_load(Window *window) {
+  window_set_background_color(s_window, settings.BackgroundColour);
+
   s_window_layer = window_get_root_layer(window);
   GRect full_bounds = layer_get_bounds(s_window_layer);
   GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
 
-  s_shift_layer = layer_create(bounds);
-  layer_add_child(s_window_layer, s_shift_layer);
-
-  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-  window_set_background_color(s_window, settings.BackgroundColour);
-
-  uint32_t TIME_AREA,
-           TIME_HEIGHT,
-           DATE_HEIGHT,
-           TIME_PADDING,
-           DATE_OFFSET;
+  s_time_layer = layer_create(bounds);
+  layer_add_child(s_window_layer, s_time_layer);
 
   switch (settings.FontStyle) {
     case OE:
@@ -239,44 +268,25 @@ static void prv_window_load(Window *window) {
   
   TIME_HEIGHT = TIME_AREA - TIME_PADDING;
 
-  GRect leftTime = grect_inset(
-    GRect(
-      0,
-      centre.y-(TIME_HEIGHT/2)-TIME_PADDING,
-      bounds.size.w/2,
-      TIME_AREA
-    ),
-    (GEdgeInsets){
-      .right=centre.x/4
-  });
-
-  GRect rightTime = grect_inset(
-    GRect(
-      centre.x,
-      centre.y-(TIME_HEIGHT/2)-TIME_PADDING,
-      bounds.size.w/2,
-      TIME_AREA
-    ),
-    (GEdgeInsets){
-      .left=centre.x/4
-  });
-
-  s_hour_layer = text_layer_create(leftTime);
+  // Time layer
+  s_hour_layer = text_layer_create(bounds);
   text_layer_set_text_alignment(s_hour_layer, GTextAlignmentCenter);
   text_layer_set_background_color(s_hour_layer, GColorClear);
   text_layer_set_text_color(s_hour_layer, settings.TimeColour);
   text_layer_set_font(s_hour_layer, s_time_font);
-  layer_add_child(s_shift_layer, text_layer_get_layer(s_hour_layer));
+  layer_add_child(s_time_layer, text_layer_get_layer(s_hour_layer));
 
-  s_mins_layer = text_layer_create(rightTime);
+  s_mins_layer = text_layer_create(bounds);
   text_layer_set_text_alignment(s_mins_layer, GTextAlignmentCenter);
   text_layer_set_background_color(s_mins_layer, GColorClear);
   text_layer_set_text_color(s_mins_layer, settings.TimeColour);
   text_layer_set_font(s_mins_layer, s_time_font);
-  layer_add_child(s_shift_layer, text_layer_get_layer(s_mins_layer));
+  layer_add_child(s_time_layer, text_layer_get_layer(s_mins_layer));
+
+  time_layout(bounds);
 
   // Bluetooth
-  s_bt_layer = layer_create(bounds);
+  s_bt_layer = layer_create(full_bounds);
   layer_set_update_proc(s_bt_layer, bt_update_proc);
   layer_add_child(s_window_layer, s_bt_layer);
   layer_set_hidden(s_bt_layer, true);
@@ -284,21 +294,14 @@ static void prv_window_load(Window *window) {
   bluetooth_callback(connection_service_peek_pebble_app_connection());
 
   // Brand layer
-  s_brand_layer = layer_create(bounds);
+  s_brand_layer = layer_create(full_bounds);
   layer_set_update_proc(s_brand_layer, brand_update_proc);
   layer_add_child(s_window_layer, s_brand_layer);
 
   // Battery
-  s_battery_layer = layer_create(bounds);
+  s_battery_layer = layer_create(full_bounds);
   layer_set_update_proc(s_battery_layer, battery_update_proc);
   layer_add_child(s_window_layer, s_battery_layer);
-
-  UnobstructedAreaHandlers handlers = {
-    .will_change = prv_unobstructed_will_change,
-    .change = prv_unobstructed_change,
-    .did_change = prv_unobstructed_did_change
-  };
-  unobstructed_area_service_subscribe(handlers, NULL);
 
   prv_window_update();
 }
@@ -309,7 +312,7 @@ static void prv_window_unload(Window *window) {
   layer_destroy(s_brand_layer);
   layer_destroy(s_bt_layer);
   layer_destroy(s_battery_layer);
-  layer_destroy(s_shift_layer);
+  layer_destroy(s_time_layer);
   fonts_unload_custom_font(s_time_font);
   if (s_window) { window_destroy(s_window); }
 }
